@@ -14,12 +14,14 @@ class ScreamerResource:
     If not checked return code 202.j
     """
 
+    # TODO: Short WEBM returns null scream chance all the time, fix it
     # TODO: If in DB return result, if not in DB, return message that added to analyze, if wrong url throw error
     def on_get(self, request, response):
         session = Session()
+        print(request.get_param_as_list('url'))
         md5 = request.get_param('md5')
         url = request.get_param('url')
-
+        response.set_header("Access-Control-Allow-Origin", "*")
         webm = session.query(WEBM).get(md5)
         if webm:
             dump = json.dumps(webm.to_dict(), indent=4)

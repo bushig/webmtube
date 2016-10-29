@@ -27,13 +27,13 @@ def get_file_md5(file):
 def download_file(url):
     """Download webm and pass file exemplar"""
     if not is_valid_2ch_url(url):
-        raise Exception("Invalid URL")
+        raise Exception("Invalid URL {}".format(url))
     u = urlopen(url)
     file_size = int(u.getheader("Content-Length"))
     if file_size > MAX_SIZE:
         raise Exception('WEBM size is too big. Allowed: {}, File size: {}'.format(MAX_SIZE, file_size))
     f = NamedTemporaryFile('w+b')
-    print("Downloading: WEBM Bytes: {}".format(file_size))
+    print("Downloading: WEBM: {} Bytes: {}".format(url, file_size))
     file_size_dl = 0
     block_sz = 8192
     while True:
@@ -46,7 +46,7 @@ def download_file(url):
         # status = "{10d}  [%3.2f%%]".format(file_size_dl, file_size_dl * 100. / file_size)
         # status = status + chr(8)*(len(status)+1)
         # print (status)
-    print('Downloaded Webm')
+    print('Downloaded WEBM: {}'.format(url))
     return f
 
 
