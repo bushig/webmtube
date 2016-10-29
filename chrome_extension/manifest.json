@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Screamer Detector",
+  "description": "Will analyze webm files from 2ch and show if its screamer",
+  "version": "1.0",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://2ch.hk/*"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "js": [
+        "script.js"
+      ]
+    }
+  ]
+}
