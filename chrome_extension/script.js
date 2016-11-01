@@ -12,7 +12,7 @@ nodes.forEach(function (val) {
     var a = div.querySelector('a');
     if (a.getAttribute('href').slice(-5) == ".webm") {
         val.addEventListener("mouseenter", function (event) {
-            //val.removeEventListener('mouseover');
+            event.target.removeEventListener(event.type, arguments.callee);
             var md5 = div.id.split('-').pop();
             var url = encodeURIComponent(qualifyURL(a.getAttribute('href')));
             var request = new Request(`https://devshaft.ru/check?md5=${md5}&url=${url}`, {
@@ -23,8 +23,8 @@ nodes.forEach(function (val) {
                     console.log(response);
                     if (response.status == 200) {
                         return response.json();
-                    } else if (response.status == 203) {
-                        div.style.background = 'blue';
+                    } else if (response.status == 202) {
+                        div.style.background = '#C0C0C0';
                     } else {
                         throw new Error(`Request error to Scream checker. Status code: ${response.status}`);
                     }
@@ -32,15 +32,15 @@ nodes.forEach(function (val) {
             ).then(function (json) {
                 var screamChance = json.scream_chance;
                 if (screamChance == null) {
-                    div.style.background = '#C0C0C0';
+                    val.style.background = 'blue';
                 } else if (screamChance == 0) {
-                    div.style.background = 'green';
+                    val.style.background = 'green';
                 } else if (screamChance == 0.5) {
-                    div.style.background = 'yellow';
+                    val.style.background = 'yellow';
                 } else if (screamChance == 0.8) {
-                    div.style.background = 'orange';
+                    val.style.background = 'orange';
                 } else if (screamChance == 1.0) {
-                    div.style.background = 'red';
+                    val.style.background = 'red';
                 }
             })
         })

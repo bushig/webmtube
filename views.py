@@ -4,8 +4,8 @@ import falcon
 from falcon import status_codes
 
 from models import Session, WEBM
-from scream_detector import analyse_video
-
+from utils import is_valid_2ch_url
+from tasks import analyse_video
 
 class ScreamerResource:
     """
@@ -27,7 +27,12 @@ class ScreamerResource:
             dump = json.dumps(webm.to_dict(), indent=4)
             response.body = dump
         else:
-            analyse_video(md5, url)
-            response.status = status_codes.HTTP_202
+            if is_valid_2ch_url(url):
+                analyse_video.delay(md5, url)
+                response.status = status_codes.HTTP_202
+                response.body = ""
+            else:
+                response.status = status_codes.HTTP_400
+                response.body = 'Not valid url in request'  # TODO: Make error handling with JSON(error attrbute)
 
             # TODO Add CheckJSON middleware to allow only JSON reqs and resps

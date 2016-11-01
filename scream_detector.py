@@ -67,18 +67,3 @@ def get_scream_chance(filename):
             scream_chance = parse_ffmpeg_output(output)
     return scream_chance
 
-
-def analyse_video(md5, url):  # TODO: Rename to smth
-    file = download_file(url)
-    if get_file_md5(file) != md5:
-        raise Exception('md5 not the same.')
-    screamer_chance = get_scream_chance(file.name)
-    print(screamer_chance)
-    session = Session()
-    webm = WEBM(md5=md5, size=0, screamer_chance=screamer_chance)
-    session.add(webm)
-    session.commit()
-    return webm
-
-
-    #analyse_video('a67cdcc6f30de9cdfc906bb9776fcf17', 'https://2ch.hk/b/src/138760856/14776051634640.webm')

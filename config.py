@@ -3,7 +3,7 @@ from os import path
 # 2CH URL
 DVACH_DOMAINS = ('2ch.hk',)
 ALLOWED_BOARDS = ('b',)
-MAX_SIZE = 5000000  # 5MB
+MAX_SIZE = 22000000  # 22MB
 
 BASE_DIR = path.abspath('')
 DB_ENGINE = 'sqlite:///db.sqlite3'

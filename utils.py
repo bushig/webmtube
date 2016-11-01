@@ -26,8 +26,6 @@ def get_file_md5(file):
 
 def download_file(url):
     """Download webm and pass file exemplar"""
-    if not is_valid_2ch_url(url):
-        raise Exception("Invalid URL {}".format(url))
     u = urlopen(url)
     file_size = int(u.getheader("Content-Length"))
     if file_size > MAX_SIZE:

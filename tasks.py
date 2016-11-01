@@ -1,0 +1,26 @@
+from celery import Celery
+
+from models import WEBM, Session
+from utils import get_file_md5, download_file
+from scream_detector import get_scream_chance
+
+# Celery instance
+app = Celery('tasks', broker='redis://localhost:6379/0')
+
+
+@app.task
+def analyse_video(md5, url):  # TODO: Rename to smth
+    file = download_file(url)
+    if get_file_md5(file) != md5:
+        raise Exception('md5 not the same.')
+    screamer_chance = get_scream_chance(file.name)
+    print(screamer_chance)
+    session = Session()
+    webm = WEBM(md5=md5, size=0, screamer_chance=screamer_chance)
+    session.add(webm)
+    session.commit()
+    return webm
+
+
+if __name__ == "__main__":
+    app.start()
