@@ -1,5 +1,6 @@
 from celery import Celery
 
+import redis
 from models import WEBM, Session
 from utils import get_file_md5, download_file
 from scream_detector import get_scream_chance
@@ -7,6 +8,7 @@ from scream_detector import get_scream_chance
 # Celery instance
 app = Celery('tasks', broker='redis://localhost:6379/0')
 
+r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
 @app.task
 def analyse_video(md5, url):  # TODO: Rename to smth
@@ -19,6 +21,7 @@ def analyse_video(md5, url):  # TODO: Rename to smth
     webm = WEBM(md5=md5, size=0, screamer_chance=screamer_chance)
     session.add(webm)
     session.commit()
+    r.delete(md5)
     return webm
 
 

@@ -29,7 +29,7 @@ def download_file(url):
     u = urlopen(url)
     file_size = int(u.getheader("Content-Length"))
     if file_size > MAX_SIZE:
-        raise Exception('WEBM size is too big. Allowed: {}, File size: {}'.format(MAX_SIZE, file_size))
+        raise Exception("WEBM size is too big. Allowed: {0}, File size: {1}".format(MAX_SIZE, file_size))
     f = NamedTemporaryFile('w+b')
     print("Downloading: WEBM: {} Bytes: {}".format(url, file_size))
     file_size_dl = 0
@@ -44,7 +44,7 @@ def download_file(url):
         # status = "{10d}  [%3.2f%%]".format(file_size_dl, file_size_dl * 100. / file_size)
         # status = status + chr(8)*(len(status)+1)
         # print (status)
-    print('Downloaded WEBM: {}'.format(url))
+    print("Downloaded WEBM: {}".format(url))
     return f
 
 
