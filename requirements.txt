@@ -4,6 +4,7 @@ billiard==3.5.0.2
 celery==4.0.2
 falcon==1.1.0
 gunicorn==19.6.0
+hiredis==0.2.0
 honcho==0.7.1
 kombu==4.0.2
 python-mimeparse==1.6.0

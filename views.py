@@ -51,3 +51,46 @@ class ScreamerResource:
                 response.body = 'Not valid url in request'  # TODO: Make error handling with JSON(error attrbute)
 
             # TODO Add CheckJSON middleware to allow only JSON reqs and resps
+
+    def on_post(self, request, response):
+        data = request.stream.read(request.content_length or 0).decode('utf-8')
+        response.set_header("Access-Control-Allow-Origin", "*")
+        resp_data = []
+        try:
+            webm_list = json.loads(data)
+            for webm in webm_list:
+                md5 = webm["md5"]
+                url = webm["url"]
+                webm_response = None
+                webm_from_db = None
+
+                webm_redis_info = r.get(md5)
+
+                if webm_redis_info is None:
+                    session = Session()  # TODO: make one session instance
+                    webm_from_db = session.query(WEBM).get(md5)
+                # If webm was in DB, return it
+                if webm_from_db:
+                    webm_response = webm_from_db.to_dict()
+                else:
+                    webm_redis_info = webm_redis_info.decode("utf-8")
+                    if webm_redis_info == "delayed":
+                        webm_response = {"md5": md5, "message": "Being analysed"}
+                    elif is_valid_2ch_url(url) and webm_redis_info is None:
+                        analyse_video.delay(md5, url)
+                        r.set(md5, 'delayed')
+                        print('Added task')
+                        webm_response = {"md5": md5, "message": "Added to analysis"}
+                    else:
+                        webm_response = {"md5": md5, "message": "Bad url"}
+
+                resp_data.append(webm_response)
+            response.status = status_codes.HTTP_200
+            response.body = json.dumps(resp_data)
+            # print(response.body)
+
+
+        except Exception as e:
+            response.status = status_codes.HTTP_400
+            response.body = 'Bad request'
+            print("error:", e)
