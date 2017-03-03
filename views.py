@@ -69,11 +69,12 @@ class ScreamerResource:
                 if webm_redis_info is None:
                     session = Session()  # TODO: make one session instance
                     webm_from_db = session.query(WEBM).get(md5)
+                else:
+                    webm_redis_info = webm_redis_info.decode("utf-8")
                 # If webm was in DB, return it
                 if webm_from_db:
                     webm_response = webm_from_db.to_dict()
                 else:
-                    webm_redis_info = webm_redis_info.decode("utf-8")
                     if webm_redis_info == "delayed":
                         webm_response = {"md5": md5, "message": "Being analysed"}
                     elif is_valid_2ch_url(url) and webm_redis_info is None:
