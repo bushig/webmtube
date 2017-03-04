@@ -10,6 +10,7 @@ from tasks import analyse_video
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
+
 class ScreamerResource:
     """
     Used to check one WEBM.
@@ -24,33 +25,36 @@ class ScreamerResource:
         md5 = request.get_param('md5')
         url = request.get_param('url')
         response.set_header("Access-Control-Allow-Origin", "*")
-        data = r.get(md5)  # info from redis
-        print("Data: ", data)
+        webm_redis_info = r.get(md5)  # info from redis
+        print("Data from redis: ", webm_redis_info)
         webm = None
         # If no data in redis store, get it from DB
-        if data is None:
+        if webm_redis_info is None:
             session = Session()
             webm = session.query(WEBM).get(md5)
+        else:
+            webm_redis_info = webm_redis_info.decode("utf-8")
         # If webm was in DB, return it
         if webm:
             dump = json.dumps(webm.to_dict(), indent=4)
             response.body = dump
         else:
-            if data == "delayed":
+            if webm_redis_info == "delayed":
                 response.status = status_codes.HTTP_202
-                response.body = "Already in queue"
-            elif is_valid_2ch_url(url) and data is None:
+                response.body = json.dumps({"md5": md5, "message": "Уже анализируется"})
+            elif is_valid_2ch_url(url) and webm_redis_info is None:
                 analyse_video.delay(md5, url)
                 r.set(md5, 'delayed')
                 print('Added task')
                 response.status = status_codes.HTTP_202
-                response.body = "Added to analysis queue"
+                response.body = json.dumps({"md5": md5, "message": "Добавлено в очередь на анализ"})
             else:
                 # not valid url
                 response.status = status_codes.HTTP_400
-                response.body = 'Not valid url in request'  # TODO: Make error handling with JSON(error attrbute)
+                response.body = json.dumps({"md5": md5,
+                                            "message": "Неправильный запрос"})  # TODO: Make error handling with JSON(error attrbute)
 
-            # TODO Add CheckJSON middleware to allow only JSON reqs and resps
+                # TODO Add CheckJSON middleware to allow only JSON reqs and resps
 
     def on_post(self, request, response):
         data = request.stream.read(request.content_length or 0).decode('utf-8')
@@ -76,14 +80,14 @@ class ScreamerResource:
                     webm_response = webm_from_db.to_dict()
                 else:
                     if webm_redis_info == "delayed":
-                        webm_response = {"md5": md5, "message": "Being analysed"}
+                        webm_response = {"md5": md5, "message": "Уже анализируется"}
                     elif is_valid_2ch_url(url) and webm_redis_info is None:
                         analyse_video.delay(md5, url)
                         r.set(md5, 'delayed')
                         print('Added task')
-                        webm_response = {"md5": md5, "message": "Added to analysis"}
+                        webm_response = {"md5": md5, "message": "Добавлено в очередь на анализ"}
                     else:
-                        webm_response = {"md5": md5, "message": "Bad url"}
+                        webm_response = {"md5": md5, "message": "Неправильный url"}
 
                 resp_data.append(webm_response)
             response.status = status_codes.HTTP_200
@@ -93,5 +97,5 @@ class ScreamerResource:
 
         except Exception as e:
             response.status = status_codes.HTTP_400
-            response.body = 'Bad request'
+            response.body = {"message": "Неправильный запрос"}
             print("error:", e)
