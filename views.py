@@ -37,23 +37,22 @@ class ScreamerResource:
             webm_redis_info = webm_redis_info.decode("utf-8")
         # If webm was in DB, return it
         if webm:
-            dump = json.dumps(webm.to_dict(), indent=4)
-            response.body = dump
+            request.context['result'] = webm.to_dict()
         else:
             if webm_redis_info == "delayed":
                 response.status = status_codes.HTTP_202
-                response.body = {"md5": md5, "message": "Уже анализируется"}
+                request.context['result'] = {"md5": md5, "message": "Уже анализируется"}
             elif is_valid_2ch_url(url) and webm_redis_info is None:
                 analyse_video.delay(md5, url)
                 r.set(md5, 'delayed')
                 print('Added task')
                 response.status = status_codes.HTTP_202
-                response.body = {"md5": md5, "message": "Добавлено в очередь на анализ"}
+                request.context['result'] = {"md5": md5, "message": "Добавлено в очередь на анализ"}
             else:
                 # not valid url
                 response.status = status_codes.HTTP_400
-                response.body = json.dumps({"md5": md5,
-                                            "message": "Неправильный запрос"})  # TODO: Make error handling with JSON(error attrbute)
+                request.context['result'] = {"md5": md5,
+                                             "message": "Неправильный запрос"}
 
                 # TODO Add CheckJSON middleware to allow only JSON reqs and resps
 

@@ -8,6 +8,9 @@ MAX_SIZE = 22000000  # 22MB
 BASE_DIR = path.abspath('')
 DB_ENGINE = 'sqlite:///db.sqlite3'
 
+# Celery configs
+BROKER = 'redis://localhost:6379/0'
+
 WEBM_PATH = path.join(BASE_DIR, 'webm_files')
 
 ## SCREAMER DETERMENITION
