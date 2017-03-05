@@ -11,6 +11,12 @@ from tasks import analyse_video
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
 
+class JsonOnlyMiddleware:
+    def process_request(self, request, response):
+        if request.method == 'POST' and 'application/json' not in request.content_type:
+            raise falcon.HTTPUnsupportedMediaType('This API only supports requests encoded as JSON.')
+
+
 class ScreamerResource:
     """
     Used to check one WEBM.
@@ -20,6 +26,7 @@ class ScreamerResource:
 
     # TODO: Short WEBM returns null scream chance all the time, fix it
     # TODO: If in DB return result, if not in DB, return message that added to analyze, if wrong url throw error
+
     def on_get(self, request, response):
         print(request.get_param_as_list('url'))
         md5 = request.get_param('md5')
