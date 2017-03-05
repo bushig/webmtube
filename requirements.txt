@@ -3,6 +3,7 @@ anyjson==0.3.3
 billiard==3.5.0.2
 celery==4.0.2
 falcon==1.1.0
+falcon-cors==1.1.2
 gunicorn==19.6.0
 hiredis==0.2.0
 honcho==0.7.1

@@ -11,12 +11,6 @@ from tasks import analyse_video
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
 
-class JsonOnlyMiddleware:
-    def process_request(self, request, response):
-        if request.method == 'POST' and 'application/json' not in request.content_type:
-            raise falcon.HTTPUnsupportedMediaType('This API only supports requests encoded as JSON.')
-
-
 class ScreamerResource:
     """
     Used to check one WEBM.
@@ -48,13 +42,13 @@ class ScreamerResource:
         else:
             if webm_redis_info == "delayed":
                 response.status = status_codes.HTTP_202
-                response.body = json.dumps({"md5": md5, "message": "Уже анализируется"})
+                response.body = {"md5": md5, "message": "Уже анализируется"}
             elif is_valid_2ch_url(url) and webm_redis_info is None:
                 analyse_video.delay(md5, url)
                 r.set(md5, 'delayed')
                 print('Added task')
                 response.status = status_codes.HTTP_202
-                response.body = json.dumps({"md5": md5, "message": "Добавлено в очередь на анализ"})
+                response.body = {"md5": md5, "message": "Добавлено в очередь на анализ"}
             else:
                 # not valid url
                 response.status = status_codes.HTTP_400
@@ -64,11 +58,10 @@ class ScreamerResource:
                 # TODO Add CheckJSON middleware to allow only JSON reqs and resps
 
     def on_post(self, request, response):
-        data = request.stream.read(request.content_length or 0).decode('utf-8')
+        webm_list = request.context['doc']
         response.set_header("Access-Control-Allow-Origin", "*")
         resp_data = []
         try:
-            webm_list = json.loads(data)
             for webm in webm_list:
                 md5 = webm["md5"]
                 url = webm["url"]
@@ -97,12 +90,12 @@ class ScreamerResource:
                         webm_response = {"md5": md5, "message": "Неправильный url"}
 
                 resp_data.append(webm_response)
-            response.status = status_codes.HTTP_200
-            response.body = json.dumps(resp_data)
+            # response.status = status_codes.HTTP_200
+            request.context['result'] = resp_data
             # print(response.body)
 
 
         except Exception as e:
             response.status = status_codes.HTTP_400
-            response.body = {"message": "Неправильный запрос"}
+            request.context['result'] = {"message": "Неправильный запрос"}
             print("error:", e)

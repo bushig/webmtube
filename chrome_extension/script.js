@@ -88,13 +88,17 @@ function getAllWEBMData(nodes) {
             }
         }
     });
+    var requestHeader = new Headers();
+    requestHeader.append('Content-Type', 'application/json');
+    requestHeader.append('Accept', 'application/json');
     var request = new Request('https://devshaft.ru/check', {
         method: 'POST',
+        headers: requestHeader,
         mode: 'cors',
         body: JSON.stringify(data)
     });
     fetch(request).then(function (resp) {
-        //console.log(resp.json());
+        console.log(resp);
         return resp.json()
     }).then(function (json) {
         json.forEach(function (data) {
