@@ -8,7 +8,7 @@ def set_cache(webm_data):
     :param webm_data: dict with data from DB
     :return: True when successful and False otherwise
     """
-    md5 = webm_data.pop('md5', None)
+    md5 = webm_data.get('md5', None)
     if md5:
         if r.type(md5) == 'hash':
             r.hmset(md5, webm_data)
