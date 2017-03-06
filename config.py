@@ -18,3 +18,8 @@ WEBM_PATH = path.join(BASE_DIR, 'webm_files')
 LOUD = -12.0  # if bigger Just loud, most likely not annoying YELLOW  %50
 SCREAM = -5.0  # Very loud, if bigger 80% scream ORANGE
 DEFENITLY_SCREAM = -0.5  #if bigger then 100% scream RED
+
+LOGGING_PATH = 'D:\\PycharmProjects\\webmtube1\\logs\\'
+LOGGING_FALCON_FILE = 'falcon.log'
+LOGGING_CELERY_FILE = 'celery.log'
+LOG_LEVEL = 10

@@ -3,12 +3,13 @@ import json
 import falcon
 import redis
 from falcon import status_codes
-
+import logging
 from models import Session, WEBM
 from utils import is_valid_2ch_url
 from tasks import analyse_video
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
+falcon_log = logging.getLogger('falcon')
 
 
 class ScreamerResource:
@@ -22,15 +23,18 @@ class ScreamerResource:
     # TODO: If in DB return result, if not in DB, return message that added to analyze, if wrong url throw error
 
     def on_get(self, request, response):
-        print(request.get_param_as_list('url'))
+        falcon_log.info('Received GET request with params {}, trying to acquire data from Redis'.format(request.get_param_as_list('url')))
+        # print(request.get_param_as_list('url'))
         md5 = request.get_param('md5')
         url = request.get_param('url')
         response.set_header("Access-Control-Allow-Origin", "*")
         webm_redis_info = r.get(md5)  # info from redis
-        print("Data from redis: ", webm_redis_info)
+        falcon_log.info('Data from redis: {}'.format(webm_redis_info))
+        # print("Data from redis: ", webm_redis_info)
         webm = None
         # If no data in redis store, get it from DB
         if webm_redis_info is None:
+            falcon_log.info('Getting data from DB')
             session = Session()
             webm = session.query(WEBM).get(md5)
         else:
@@ -45,7 +49,8 @@ class ScreamerResource:
             elif is_valid_2ch_url(url) and webm_redis_info is None:
                 analyse_video.delay(md5, url)
                 r.set(md5, 'delayed')
-                print('Added task')
+                falcon_log.info('Adding WEBM to task queue with url of {}'.format(url))
+                # print('Added task')
                 response.status = status_codes.HTTP_202
                 request.context['result'] = {"md5": md5, "message": "Добавлено в очередь на анализ"}
             else:
@@ -57,6 +62,8 @@ class ScreamerResource:
                 # TODO Add CheckJSON middleware to allow only JSON reqs and resps
 
     def on_post(self, request, response):
+        falcon_log.info('Received POST request with params {}, trying to acquire data from Redis'.format(
+            request.context['doc']))
         webm_list = request.context['doc']
         response.set_header("Access-Control-Allow-Origin", "*")
         resp_data = []
@@ -83,7 +90,8 @@ class ScreamerResource:
                     elif is_valid_2ch_url(url) and webm_redis_info is None:
                         analyse_video.delay(md5, url)
                         r.set(md5, 'delayed')
-                        print('Added task')
+                        falcon_log.info('Adding WEBM to task queue with url of {}'.format(url))
+                        # print('Added task')
                         webm_response = {"md5": md5, "message": "Добавлено в очередь на анализ"}
                     else:
                         webm_response = {"md5": md5, "message": "Неправильный url"}
