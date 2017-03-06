@@ -26,9 +26,7 @@ class ScreamerResource:
         print(request.get_param_as_list('url'))
         md5 = request.get_param('md5')
         url = request.get_param('url')
-        response.set_header("Access-Control-Allow-Origin", "*")
         webm_redis_info = get_cache(md5)  # info from redis
-        print("Data from redis: ", webm_redis_info)
         webm = None
         # If no data in redis store, get it from DB
         if webm_redis_info is None:
@@ -43,6 +41,9 @@ class ScreamerResource:
             if webm_redis_info == "delayed":
                 response.status = status_codes.HTTP_202
                 request.context['result'] = {"md5": md5, "message": "Уже анализируется"}
+            elif isinstance(webm_redis_info, dict):
+                response.status = status_codes.HTTP_200
+                request.context['result'] = webm_redis_info
             elif is_valid_2ch_url(url) and webm_redis_info is None:
                 analyse_video.delay(md5, url)
                 set_cache_delayed(md5)
@@ -58,7 +59,6 @@ class ScreamerResource:
 
     def on_post(self, request, response):
         webm_list = request.context['doc']
-        response.set_header("Access-Control-Allow-Origin", "*")
         resp_data = []
         try:
             for webm in webm_list:
@@ -80,6 +80,8 @@ class ScreamerResource:
                 else:
                     if webm_redis_info == "delayed":
                         webm_response = {"md5": md5, "message": "Уже анализируется"}
+                    elif isinstance(webm_redis_info, dict):
+                        webm_response = webm_redis_info
                     elif is_valid_2ch_url(url) and webm_redis_info is None:
                         analyse_video.delay(md5, url)
                         set_cache_delayed(md5)
@@ -89,9 +91,7 @@ class ScreamerResource:
                         webm_response = {"md5": md5, "message": "Неправильный url"}
 
                 resp_data.append(webm_response)
-            # response.status = status_codes.HTTP_200
             request.context['result'] = resp_data
-            # print(response.body)
 
 
         except Exception as e:

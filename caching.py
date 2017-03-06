@@ -10,7 +10,8 @@ def set_cache(webm_data):
     """
     md5 = webm_data.get('md5', None)
     if md5:
-        if r.type(md5) == 'hash':
+        r_type = r.type(md5)
+        if r_type == 'none':
             r.hmset(md5, webm_data)
             return True
     return False
