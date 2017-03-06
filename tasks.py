@@ -5,11 +5,10 @@ from config import BROKER
 from models import WEBM, Session
 from utils import get_file_md5, download_file
 from scream_detector import get_scream_chance
+from caching import set_cache, del_cache
 
 # Celery instance
 app = Celery('tasks', broker=BROKER)
-
-r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
 @app.task
 def analyse_video(md5, url):  # TODO: Rename to smth
@@ -19,10 +18,11 @@ def analyse_video(md5, url):  # TODO: Rename to smth
     screamer_chance = get_scream_chance(file.name)
     print(screamer_chance)
     session = Session()
-    webm = WEBM(md5=md5, size=0, screamer_chance=screamer_chance)
+    webm = WEBM(md5=md5, screamer_chance=screamer_chance)
     session.add(webm)
     session.commit()
-    r.delete(md5)
+    del_cache(md5)  # TODO: Delete Delayed message and set new in one transaction to prevent possible race condition
+    set_cache(webm.to_dict())
     return webm
 
 

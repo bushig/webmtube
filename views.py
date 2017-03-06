@@ -7,6 +7,7 @@ from falcon import status_codes
 from models import Session, WEBM
 from utils import is_valid_2ch_url
 from tasks import analyse_video
+from caching import set_cache_delayed, get_cache, set_cache
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 
@@ -26,25 +27,25 @@ class ScreamerResource:
         md5 = request.get_param('md5')
         url = request.get_param('url')
         response.set_header("Access-Control-Allow-Origin", "*")
-        webm_redis_info = r.get(md5)  # info from redis
+        webm_redis_info = get_cache(md5)  # info from redis
         print("Data from redis: ", webm_redis_info)
         webm = None
         # If no data in redis store, get it from DB
         if webm_redis_info is None:
             session = Session()
             webm = session.query(WEBM).get(md5)
-        else:
-            webm_redis_info = webm_redis_info.decode("utf-8")
         # If webm was in DB, return it
         if webm:
-            request.context['result'] = webm.to_dict()
+            DB_data = webm.to_dict()
+            request.context['result'] = DB_data
+            set_cache(DB_data)
         else:
             if webm_redis_info == "delayed":
                 response.status = status_codes.HTTP_202
                 request.context['result'] = {"md5": md5, "message": "Уже анализируется"}
             elif is_valid_2ch_url(url) and webm_redis_info is None:
                 analyse_video.delay(md5, url)
-                r.set(md5, 'delayed')
+                set_cache_delayed(md5)
                 print('Added task')
                 response.status = status_codes.HTTP_202
                 request.context['result'] = {"md5": md5, "message": "Добавлено в очередь на анализ"}
@@ -54,7 +55,6 @@ class ScreamerResource:
                 request.context['result'] = {"md5": md5,
                                              "message": "Неправильный запрос"}
 
-                # TODO Add CheckJSON middleware to allow only JSON reqs and resps
 
     def on_post(self, request, response):
         webm_list = request.context['doc']
@@ -67,22 +67,22 @@ class ScreamerResource:
                 webm_response = None
                 webm_from_db = None
 
-                webm_redis_info = r.get(md5)
+                webm_redis_info = get_cache(md5)
 
                 if webm_redis_info is None:
                     session = Session()  # TODO: make one session instance
                     webm_from_db = session.query(WEBM).get(md5)
-                else:
-                    webm_redis_info = webm_redis_info.decode("utf-8")
                 # If webm was in DB, return it
                 if webm_from_db:
-                    webm_response = webm_from_db.to_dict()
+                    DB_data = webm_from_db.to_dict()
+                    webm_response = DB_data
+                    set_cache(DB_data)
                 else:
                     if webm_redis_info == "delayed":
                         webm_response = {"md5": md5, "message": "Уже анализируется"}
                     elif is_valid_2ch_url(url) and webm_redis_info is None:
                         analyse_video.delay(md5, url)
-                        r.set(md5, 'delayed')
+                        set_cache_delayed(md5)
                         print('Added task')
                         webm_response = {"md5": md5, "message": "Добавлено в очередь на анализ"}
                     else:

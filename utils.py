@@ -16,6 +16,11 @@ def is_valid_2ch_url(url):
     return False
 
 
+def before_shutdown_handler():
+    # TODO: save all data from redis to db and flush it
+    print('Shutting down')
+
+
 def get_file_md5(file):
     h = hashlib.md5()
     file.seek(0)
