@@ -11,6 +11,10 @@ DB_ENGINE = 'sqlite:///db.sqlite3'
 # Celery configs
 BROKER = 'redis://localhost:6379/0'
 
+# Redis caching
+CACHING_HOST = 'redis://localhost:6379/1'
+LIKES_HOST = 'redis://localhost:6379/2'
+
 WEBM_PATH = path.join(BASE_DIR, 'webm_files')
 
 ## SCREAMER DETERMENITION
