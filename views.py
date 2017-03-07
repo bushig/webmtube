@@ -3,13 +3,14 @@ import json
 import falcon
 import redis
 from falcon import status_codes
-
+import logging
 from models import Session, WEBM
 from utils import is_valid_2ch_url
 from tasks import analyse_video
 from caching import set_cache_delayed, get_cache, set_cache
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
+falcon_log = logging.getLogger('falcon')
 
 
 class ScreamerResource:
@@ -23,13 +24,18 @@ class ScreamerResource:
     # TODO: If in DB return result, if not in DB, return message that added to analyze, if wrong url throw error
 
     def on_get(self, request, response):
-        print(request.get_param_as_list('url'))
+        falcon_log.info('Received GET request with params {}, trying to acquire data from Redis'.format(request.get_param_as_list('url')))
+        # print(request.get_param_as_list('url'))
         md5 = request.get_param('md5')
         url = request.get_param('url')
+        response.set_header("Access-Control-Allow-Origin", "*")        
+        # print("Data from redis: ", webm_redis_info)
         webm_redis_info = get_cache(md5)  # info from redis
+        falcon_log.info('Data from redis: {}'.format(webm_redis_info))
         webm = None
         # If no data in redis store, get it from DB
         if webm_redis_info is None:
+            falcon_log.info('Getting data from DB')
             session = Session()
             webm = session.query(WEBM).get(md5)
         # If webm was in DB, return it
@@ -46,8 +52,9 @@ class ScreamerResource:
                 request.context['result'] = webm_redis_info
             elif is_valid_2ch_url(url) and webm_redis_info is None:
                 analyse_video.delay(md5, url)
+                falcon_log.info('Adding WEBM to task queue with url of {}'.format(url))
                 set_cache_delayed(md5)
-                print('Added task')
+                #print('Added task')
                 response.status = status_codes.HTTP_202
                 request.context['result'] = {"md5": md5, "message": "Добавлено в очередь на анализ"}
             else:
@@ -58,6 +65,8 @@ class ScreamerResource:
 
 
     def on_post(self, request, response):
+        falcon_log.info('Received POST request with params {}, trying to acquire data from Redis'.format(
+            request.context['doc']))
         webm_list = request.context['doc']
         resp_data = []
         try:
@@ -84,8 +93,9 @@ class ScreamerResource:
                         webm_response = webm_redis_info
                     elif is_valid_2ch_url(url) and webm_redis_info is None:
                         analyse_video.delay(md5, url)
+                        falcon_log.info('Adding WEBM to task queue with url of {}'.format(url))
                         set_cache_delayed(md5)
-                        print('Added task')
+                        #print('Added task')
                         webm_response = {"md5": md5, "message": "Добавлено в очередь на анализ"}
                     else:
                         webm_response = {"md5": md5, "message": "Неправильный url"}
