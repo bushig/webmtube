@@ -10,7 +10,6 @@ from caching import set_cache, del_cache
 # Celery instance
 app = Celery('tasks', broker=BROKER)
 
-r = redis.StrictRedis(host='localhost', port=6379, db=1)
 celery_log = logging.getLogger('celery')
 
 @app.task
@@ -28,10 +27,11 @@ def analyse_video(md5, url):# TODO: Rename to smth
         session.add(webm)
         session.commit()
         del_cache(md5)  # TODO: Delete Delayed message and set new in one transaction to prevent possible race condition
-        celery_log.info('Releasing WEBM from Redis')
+        celery_log.info('Releasing WEBM from Celery')
         set_cache(webm.to_dict())
         return webm
     except Exception as e:
+        celery_log.exception('Error encountered: %s' % (e,))
 
 
 if __name__ == "__main__":
