@@ -37,3 +37,14 @@ def get_cache(md5):
         return 'delayed'  # TODO: maybe get value from redis storage
     else:
         return
+
+
+def incr_views(md5):
+    """
+    :return: True if increased, False if failed
+    """
+    try:
+        r.hincrby(md5, 'views')
+        return True
+    except Exception as e:
+        return False

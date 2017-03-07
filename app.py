@@ -3,7 +3,7 @@ import atexit
 
 import falcon
 from falcon_cors import CORS
-from views import ScreamerResource
+from views import ScreamerResource, ViewWEBMResource
 from models import Base, engine
 from middleware import RequireJSON, JSONTranslator
 import os
@@ -47,8 +47,10 @@ app = falcon.API(middleware=[cors.middleware, RequireJSON(), JSONTranslator()])
 
 # Resources for API
 screamer_resource = ScreamerResource()
+view_webm_resource = ViewWEBMResource()
 
 # Routing
 app.add_route('/check', screamer_resource)
+app.add_route('/check/{md5}/view', view_webm_resource)
 
 atexit.register(before_shutdown_handler)

@@ -9,7 +9,7 @@ function qualifyURL(url) {
     return a.href;
 }
 
-function setMessage(node, text) {
+function setMessage(node, text, color) {
     //Sets message of webm, accepts figure.image selector and text
     var parent = node.querySelector('figcaption.file-attr');
     var message = parent.querySelector('span.message');
@@ -19,7 +19,19 @@ function setMessage(node, text) {
         parent.insertBefore(message, parent.children[1]);
     }
     message.innerText = text;
-    message.style.background = '#60D68C';
+    message.style.background = color;
+}
+
+function setViewListener(node, md5) {
+    var img = node.querySelector('img');
+    img.addEventListener('click', function (event) {
+        event.target.removeEventListener(event.type, arguments.callee);
+        var request = new Request(`https://devshaft.ru/check/${md5}/view`, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        fetch(request);
+    });
 }
 
 function setScreamColor(node, screamChance) {
@@ -57,13 +69,14 @@ function parseData(data) {
     var node = active_nodes[md5];
     if (data.message) {
         console.log(data.message);
-        setMessage(node, data.message);
+        setMessage(node, data.message, '#60D68C');
         node.addEventListener('mouseenter', function (event) {
             event.target.removeEventListener(event.type, arguments.callee);
             setTimeout(getOneWEBMData, 5000, node);
         })
     } else {
-        setMessage(node, null);
+        setMessage(node, "Просмотров: " + data.views, '#b3b3b3');
+        setViewListener(node, data.md5);
         var screamChance = data.scream_chance;
         setScreamColor(node, screamChance);
     }

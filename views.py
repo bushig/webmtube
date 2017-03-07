@@ -7,7 +7,7 @@ import logging
 from models import Session, WEBM
 from utils import is_valid_2ch_url
 from tasks import analyse_video
-from caching import set_cache_delayed, get_cache, set_cache
+from caching import set_cache_delayed, get_cache, set_cache, incr_views
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 falcon_log = logging.getLogger('falcon')
@@ -108,3 +108,12 @@ class ScreamerResource:
             response.status = status_codes.HTTP_400
             request.context['result'] = {"message": "Неправильный запрос"}
             print("error:", e)
+
+
+class ViewWEBMResource:
+    def on_get(self, request, response, md5):
+        succeed = incr_views(md5)
+        if succeed:
+            response.status = status_codes.HTTP_200
+        else:
+            request.context['result'] = {"message": "Ошибка"}  # TODO: make NO WEBM IN REDIS error
