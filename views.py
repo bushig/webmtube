@@ -17,7 +17,7 @@ class ScreamerResource:
     """
     Used to check one WEBM.
     If already checked, return code 200 and WEBM info.
-    If not checked return code 202.j
+    If not checked return code 202.
     """
 
     # TODO: Short WEBM returns null scream chance all the time, fix it

@@ -5,6 +5,7 @@ from tempfile import NamedTemporaryFile
 import hashlib
 
 from config import WEBM_PATH, DVACH_DOMAINS, ALLOWED_BOARDS, MAX_SIZE
+from caching import pop_webm_from_redis_list, save_webm_to_db
 
 
 def is_valid_2ch_url(url):
@@ -19,6 +20,15 @@ def is_valid_2ch_url(url):
 def before_shutdown_handler():
     # TODO: save all data from redis to db and flush it
     print('Shutting down')
+    counter = 0
+    while True:
+        md5 = pop_webm_from_redis_list()
+        if md5 is None:
+            break
+        save_webm_to_db(md5)
+        counter += 1
+        print("Saved webm to DB: ", md5)
+    print("Saved ", counter, "in total")
 
 
 def get_file_md5(file):

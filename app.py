@@ -13,10 +13,8 @@ from logging.handlers import TimedRotatingFileHandler
 from config import LOGGING_CELERY_FILE, LOGGING_FALCON_FILE, LOGGING_PATH, LOG_LEVEL
 from utils import before_shutdown_handler
 
-
 # Init DB
 Base.metadata.create_all(engine)
-
 
 # Logging init
 LOGGING_FALCON_PATH = os.path.join(LOGGING_PATH, LOGGING_FALCON_FILE)
@@ -48,7 +46,7 @@ app = falcon.API(middleware=[cors.middleware, RequireJSON(), JSONTranslator()])
 # Resources for API
 screamer_resource = ScreamerResource()
 view_webm_resource = ViewWEBMResource()
-
+# TODO: To get user real ip reconfigure nginix according to http://docs.gunicorn.org/en/stable/deploy.html (set X-Forwarded-For header)
 # Routing
 app.add_route('/check', screamer_resource)
 app.add_route('/check/{md5}/view', view_webm_resource)

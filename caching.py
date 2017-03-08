@@ -1,4 +1,5 @@
 import redis
+from models import Session, WEBM
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1, decode_responses=True)
 
@@ -13,6 +14,7 @@ def set_cache(webm_data):
         r_type = r.type(md5)
         if r_type == 'none':
             r.hmset(md5, webm_data)
+            r.rpush('webmlist', md5)
             return True
     return False
 
@@ -25,6 +27,21 @@ def del_cache(md5):
     r.delete(md5)
 
 
+def pop_webm_from_redis_list():
+    return r.lpop('webmlist')
+
+
+def save_webm_to_db(md5):
+    data = r.hgetall(md5)
+    session = Session()
+    webm = session.query(WEBM).get(md5)
+    webm.views = data['views']
+    webm.likes = data['likes']
+    webm.dislikes = data['dislikes']
+    session.commit()  # TODO: maybe should be one bulk operation to save all webms
+    del_cache(md5)
+
+
 def get_cache(md5):
     """
     :return: WEBM data, 'delayed' message or None depending on results
@@ -34,7 +51,7 @@ def get_cache(md5):
     if r_type == 'hash':
         return r.hgetall(md5)
     elif r_type == 'string':
-        return 'delayed'  # TODO: maybe get value from redis storage
+        return 'delayed'  # TODO: maybe get this value from redis storage
     else:
         return
 
