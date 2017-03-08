@@ -8,6 +8,11 @@ Service to detect screamers on 2ch.hk
 
 #How to start
 1. Start redis server
-```redis-server```
+```
+redis-server
+```
+
 2. Start app using honcho
-```honcho start```
+```
+honcho start
+```
