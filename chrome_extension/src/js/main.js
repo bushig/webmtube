@@ -1,3 +1,5 @@
+import runAPI from './dollchan_connector'
+
 var MAX_SIZE = 22000; //Max size in KB
 
 var nodes = document.querySelectorAll("figure.image");
@@ -24,8 +26,8 @@ function setMessage(node, text, color) {
 
 function setViewListener(node, md5) {
     var img = node.querySelector('img');
-    img.addEventListener('click', function (event) {
-        event.target.removeEventListener(event.type, arguments.callee);
+    img.addEventListener('click', function increaseViewsListener(event) {
+        event.target.removeEventListener('click', increaseViewsListener);
         var request = new Request(`https://devshaft.ru/check/${md5}/view`, {
             method: 'GET',
             mode: 'cors'
@@ -70,8 +72,8 @@ function parseData(data) {
     if (data.message) {
         console.log(data.message);
         setMessage(node, data.message, '#60D68C');
-        node.addEventListener('mouseenter', function (event) {
-            event.target.removeEventListener(event.type, arguments.callee);
+        node.addEventListener('mouseenter', function OneWEBMListener(event) {
+            event.target.removeEventListener('mouseenter', OneWEBMListener);
             setTimeout(getOneWEBMData, 5000, node);
         })
     } else {
@@ -120,44 +122,5 @@ function getAllWEBMData(nodes) {
     })
 }
 
+setTimeout(runAPI(), 0);
 getAllWEBMData(nodes);
-
-// nodes.forEach(function (val) {
-//     var div = val.querySelector('div');
-//     var a = div.querySelector('a');
-//     if (a.getAttribute('href').slice(-5) == ".webm") {
-//         val.addEventListener("mouseenter", function (event) {
-//             event.target.removeEventListener(event.type, arguments.callee);
-//             var md5 = div.id.split('-').pop();
-//             var url = encodeURIComponent(qualifyURL(a.getAttribute('href')));
-//             var request = new Request(`https://devshaft.ru/check?md5=${md5}&url=${url}`, {
-//                 method: 'GET',
-//                 mode: 'cors'
-//             });
-//             fetch(request).then(function (response) {
-//                     console.log(response);
-//                     if (response.status == 200) {
-//                         return response.json();
-//                     } else if (response.status == 202) {
-//                         div.style.background = '#C0C0C0';
-//                     } else {
-//                         throw new Error(`Request error to Scream checker. Status code: ${response.status}`);
-//                     }
-//                 }
-//             ).then(function (json) {
-//                 var screamChance = json.scream_chance;
-//                 if (screamChance == null) {
-//                     val.style.background = 'blue';
-//                 } else if (screamChance == 0) {
-//                     val.style.background = 'green';
-//                 } else if (screamChance == 0.5) {
-//                     val.style.background = 'yellow';
-//                 } else if (screamChance == 0.8) {
-//                     val.style.background = 'orange';
-//                 } else if (screamChance == 1.0) {
-//                     val.style.background = 'red';
-//                 }
-//             })
-//         })
-//     }
-// });
