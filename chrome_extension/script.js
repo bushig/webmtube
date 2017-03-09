@@ -97,7 +97,7 @@ function getAllWEBMData(nodes) {
                 active_nodes[md5] = val;
                 data.push(webm);
             } else {
-                setMessage(val, 'Слишком большой размер')
+                setMessage(val, 'Слишком большой размер', 'orange')
             }
         }
     });

@@ -49,7 +49,10 @@ def get_cache(md5):
     r_type = r.type(md5)
 
     if r_type == 'hash':
-        return r.hgetall(md5)
+        cache = r.hgetall(md5)
+        if cache['scream_chance'] == 'None':  # Because of redis-py (nil) value casting
+            cache['scream_chance'] = None
+        return cache
     elif r_type == 'string':
         return 'delayed'  # TODO: maybe get this value from redis storage
     else:
