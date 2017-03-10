@@ -107,7 +107,7 @@ class ScreamerResource:
         except Exception as e:
             response.status = status_codes.HTTP_400
             request.context['result'] = {"message": "Неправильный запрос"}
-            print("error:", e)
+            print("error in post request:", e)
 
 
 class ViewWEBMResource:

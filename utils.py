@@ -1,4 +1,4 @@
-from urllib.request import urlopen
+from urllib.request import urlopen, URLError
 from urllib.parse import urlparse
 from os import path
 from tempfile import NamedTemporaryFile
@@ -41,7 +41,11 @@ def get_file_md5(file):
 
 def download_file(url):
     """Download webm and pass file exemplar"""
-    u = urlopen(url)
+    try:
+        u = urlopen(url)
+    except URLError as e:
+        print("Error: {} while opening webm url: {}".format(e, url))
+        raise URLError
     file_size = int(u.getheader("Content-Length"))
     if file_size > MAX_SIZE:
         raise Exception("WEBM size is too big. Allowed: {0}, File size: {1}".format(MAX_SIZE, file_size))

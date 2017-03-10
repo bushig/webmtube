@@ -1,5 +1,5 @@
 from celery import Celery
-import redis
+from urllib.error import URLError
 import logging
 from config import BROKER
 from models import WEBM, Session
@@ -12,7 +12,8 @@ app = Celery('tasks', broker=BROKER)
 
 celery_log = logging.getLogger('celery')
 
-@app.task
+
+@app.task(autoretry_for=(URLError,))
 def analyse_video(md5, url):# TODO: Rename to smth
     try:
         celery_log.info('Downloading new video with url of %s' % (url,))
