@@ -28,7 +28,7 @@ class WEBM(Base):
     # TODO: Define to_dictionary for JSON serialization
     def to_dict(self):
         return {'md5': self.md5, 'time_created': self.time_created.isoformat(),
-                'scream_chance': self.screamer_chance, 'views': self.views, 'likes': self.likes,
+                'screamer_chance': self.screamer_chance, 'views': self.views, 'likes': self.likes,
                 'dislikes': self.dislikes}
 
     def __init__(self, md5, screamer_chance=None):

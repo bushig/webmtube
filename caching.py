@@ -9,7 +9,7 @@ def set_cache(webm_data):
     :param webm_data: dict with data from DB
     :return: True when successful and False otherwise
     """
-    md5 = webm_data.get('md5', None)
+    md5 = webm_data.get('md5', None)  # TODO: check its schema
     if md5:
         r_type = r.type(md5)
         if r_type == 'none':

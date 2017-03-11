@@ -1,4 +1,4 @@
-import getAllWEBMData from './thread'
+import threadHandler from './thread'
 import {BOARDS} from "./config"
 
 //Смотрим находимся ли мы в треде или на главной странице борды
@@ -7,13 +7,16 @@ const pathArray = curr_url.split('/');
 const currBoard = pathArray[1];
 // Если мы не на главной странице и доска поддерживается, то включаем скрипт
 console.log(currBoard);
+console.log(pathArray.length);
+
 if (currBoard && BOARDS.indexOf(currBoard) !== -1) {
     //Если в списке тредов
-    if (pathArray.length == 2) {
+    if (pathArray.length == 3) {
         //threadListHandler
+        console.log("Мы в списке тредов");
+        //Если в треде
     } else {
-        var nodes = document.querySelectorAll("figure.image");
-        getAllWEBMData(nodes);
+        threadHandler();
     }
 } else {
     console.log("Отключили webmtube");

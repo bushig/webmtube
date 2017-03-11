@@ -13,7 +13,7 @@ app = Celery('tasks', broker=BROKER)
 celery_log = logging.getLogger('celery')
 
 
-@app.task(autoretry_for=(URLError,))
+@app.task(autoretry_for=(URLError,), ignore_result=True)
 def analyse_video(md5, url):# TODO: Rename to smth
     try:
         celery_log.info('Downloading new video with url of %s' % (url,))
