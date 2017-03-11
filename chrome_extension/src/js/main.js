@@ -1,4 +1,5 @@
 import threadHandler from './thread'
+import threadListHandler from './threadList'
 import {BOARDS} from "./config"
 
 //Смотрим находимся ли мы в треде или на главной странице борды
@@ -12,10 +13,11 @@ console.log(pathArray.length);
 if (currBoard && BOARDS.indexOf(currBoard) !== -1) {
     //Если в списке тредов
     if (pathArray.length == 3) {
-        //threadListHandler
         console.log("Мы в списке тредов");
+        threadListHandler();
         //Если в треде
     } else {
+        console.log("Мы в треде");
         threadHandler();
     }
 } else {
