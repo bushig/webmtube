@@ -45,7 +45,7 @@ module.exports = {
         new WriteFilePlugin(),
         new CopyWebpackPlugin([
             //icon
-            {from: 'src/icon.ico'},
+            {from: 'src/icon.png'},
         ])
     ]
 };
