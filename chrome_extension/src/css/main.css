@@ -1,0 +1,76 @@
+.message {
+    padding: 0px;
+}
+
+.webm-panel {
+    display: block;
+    /*font-size: 0.9em;*/
+}
+
+.scream {
+    border-radius: 50%;
+}
+
+.glyphicon {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+
+.spin {
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(359deg);
+    }
+}
+
+.webm-panel > span + span {
+    font-size: 14px;
+    color: black;
+}
+
+.webm-panel > span + span::before {
+    content: "|";
+    color: grey;
+    font-size: 14px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.webm-file.blue-shadow:hover {
+    -webkit-filter: drop-shadow(0px 0px 8px #3DBFFF); /* Safari */
+    filter: drop-shadow(0px 0px 8px #3DBFFF);
+}
+
+.webm-file.green-shadow:hover {
+    -webkit-filter: drop-shadow(0px 0px 8px #45D754); /* Safari */
+    filter: drop-shadow(0px 0px 8px #45D754);
+}
+
+.webm-file.yellow-shadow:hover {
+    -webkit-filter: drop-shadow(0px 0px 8px yellow); /* Safari */
+    filter: drop-shadow(0px 0px 8px yellow);
+}
+
+.webm-file.orange-shadow:hover {
+    -webkit-filter: drop-shadow(0px 0px 15px orange); /* Safari */
+    filter: drop-shadow(0px 0px 15px orange);
+}
+
+.webm-file.red-shadow:hover {
+    -webkit-filter: drop-shadow(0px 0px 20px red); /* Safari */
+    filter: drop-shadow(0px 0px 20px red);
+}

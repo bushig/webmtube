@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Screamer Detector",
   "description": "Анализирует WEBM файлы на 2ch.hk и показывает являются ли они скримерами.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "browser_action": {
     "default_popup": "popup.html"
   },
@@ -16,6 +16,9 @@
       ],
       "js": [
         "main.bundle.js"
+      ],
+      "css": [
+        "css/main.css"
       ]
     }
   ],
@@ -23,5 +26,8 @@
     "16": "icon.png",
     "32": "icon.png",
     "128": "icon.png"
-  }
+  },
+  "web_accessible_resources": [
+    "icons/*.svg"
+  ]
 }

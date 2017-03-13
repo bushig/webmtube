@@ -17,7 +17,7 @@ if (fileSystem.existsSync(secretsPath)) {
 module.exports = {
     entry: {
         popup: path.join(__dirname, "src", "js", "popup.js"),
-        main: path.join(__dirname, "src", "js", "main.js")
+        main: path.join(__dirname, "src", "js", "main.js"),
     },
     output: {
         path: path.join(__dirname, "build"),
@@ -46,6 +46,8 @@ module.exports = {
         new CopyWebpackPlugin([
             //icon
             {from: 'src/icon.png'},
+            {from: 'src/icons', to: 'icons'},
+            {from: 'src/css', to: 'css'}
         ])
     ]
 };

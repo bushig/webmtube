@@ -6,22 +6,63 @@ function qualifyURL(url) {
     a.href = url;
     return a.href;
 }
-//Sets message of webm, accepts figure.image selector, text and color
-function setMessage(node, text, color) {
-    var parent = node.querySelector('figcaption.file-attr');
-    var message = parent.querySelector('span.message');
-    if (message == null) {
+// Создаем панель если ее нет и в ней размещаем всю информацию
+function setWEBMPanel({node, screamChance, views, likes, dislikes, message} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
+    let panel = node.querySelector('figcaption > .webm-panel');
+    if (panel === null) {
+        panel = document.createElement('div');
+        panel.className = 'webm-panel';
+        const figcaption = node.querySelector('figcaption');
+        figcaption.insertBefore(panel, figcaption.children[1]);
+    }
+    if (screamChance !== undefined) {
+        setScreamColor(node, panel, screamChance);
+    }
+    if (views !== undefined) {
+        setViews(panel, views);
+    }
+    if (likes !== undefined) {
+        // setLikes(panel, likes)
+    }
+    if (dislikes !== undefined) {
+        // setDislikes(panel, dislikes);
+    }
+    if (message !== undefined) {
+        setMessage(panel, message);
+    }
+
+}
+
+function setViews(panel, views) {
+    let views_elem = panel.querySelector('span.views');
+    if (views_elem === null) {
+        views_elem = document.createElement('span');
+        views_elem.className = 'views';
+
+        createIcon(views_elem, 'eye');
+
+        panel.appendChild(views_elem);
+    }
+    const text = document.createTextNode(views);
+    views_elem.appendChild(text);
+}
+//Sets message of webm, accepts webm-panel selector and text
+function setMessage(panel, text) {
+    var message = panel.querySelector('span.message');
+    if (message === null) {
         message = document.createElement('span');
         message.className = 'message';
-        parent.insertBefore(message, parent.children[1]);
+        panel.appendChild(message);
     }
     message.innerText = text;
-    message.style.background = color;
+    if (text === null) {
+        message.remove()
+    }
 }
 
 // Отвечает за увеличение счетчика просмотров
 function setViewListener(node, md5) {
-    var img = node.querySelector('img');
+    var img = node.querySelector('img.preview');
     img.addEventListener('click', function increaseViewsListener(event) {
         event.target.removeEventListener('click', increaseViewsListener);
         var request = new Request(`https://devshaft.ru/check/${md5}/view`, {
@@ -33,39 +74,72 @@ function setViewListener(node, md5) {
 }
 
 // Красит элемент в нужный цвет в зависимости от шанса скримера
-function setScreamColor(node, screamChance) {
+function setScreamColor(node, panel, screamChance) {
+    var scream = panel.querySelector('span.scream');
+    if (scream === null) {
+        scream = document.createElement('span');
+        scream.className = 'scream';
+        panel.appendChild(scream);
+    }
+    const img = node.querySelector('.webm-file');
     if (screamChance == null) {
-        node.style.background = 'blue';
+        img.className += 'blue-shadow ';
+        scream.style.background = '#3DBFFF';
+        createIcon(scream, 'volume-mute');
     } else if (screamChance == 0) {
-        node.style.background = 'green';
+        img.className += 'green-shadow ';
+        scream.style.background = '#45D754';
+        createIcon(scream, 'volume-low');
     } else if (screamChance == 0.5) {
-        node.style.background = 'yellow';
+        img.className += 'yellow-shadow ';
+        scream.style.background = 'yellow';
+        createIcon(scream, 'volume-medium');
     } else if (screamChance == 0.8) {
-        node.style.background = 'orange';
+        img.className += 'orange-shadow ';
+        scream.style.background = 'orange';
+        createIcon(scream, 'volume-high');
     } else if (screamChance == 1.0) {
-        node.style.background = 'red';
+        img.className += 'red-shadow ';
+        scream.style.background = 'red';
+        createIcon(scream, 'volume-scream');
     }
 }
-
+function createIcon(node, name) {
+    let icon = node.querySelector('img');
+    if (icon === null) {
+        icon = document.createElement('img');
+        icon.className = 'glyphicon';
+        node.appendChild(icon);
+    }
+    icon.setAttribute('src', chrome.runtime.getURL('icons/' + name + '.svg'));
+}
 // В зависимости от полученных с сервера данных обрабатывает посты в треде
 // data - объект с данными одной webm
 function parseData(data) {
     var md5 = data.md5;
     window.webm_data[md5].data = data;
     var nodes = window.webm_data[md5].elems;
-    nodes.forEach((node)=> {
-        if (data.message) {
-            console.log(data.message);
-            setMessage(node, data.message, '#60D68C');
-            node.addEventListener('mouseenter', function OneWEBMListener(event) {
-                event.target.removeEventListener('mouseenter', OneWEBMListener);
-                setTimeout(getOneWEBMData, 5000, node);
-            })
-        } else {
-            setMessage(node, "Просмотров: " + data.views, '#b3b3b3');
-            setViewListener(node, data.md5);
-            var screamChance = data["screamer_chance"];
-            setScreamColor(node, screamChance);
+    // if(nodes.length>1){
+    //     console.log(nodes);
+    // }
+    nodes.forEach((node_info, index)=> {
+        const node = node_info.node;
+        const processed = node_info.processed;
+        // Обрабатываем только новые ноды
+        if (!processed) {
+            window.webm_data[md5].elems[index].processed = true;
+            if (data.message) {
+                console.log(data.message);
+                setWEBMPanel({node, message: data.message});
+                node.addEventListener('mouseenter', function OneWEBMListener(event) {
+                    event.target.removeEventListener('mouseenter', OneWEBMListener);
+                    setTimeout(getOneWEBMData, 5000, node);
+                })
+            } else {
+                var screamChance = data["screamer_chance"];
+                setWEBMPanel({node, screamChance: screamChance, views: data.views, message: null});
+                setViewListener(node, data.md5);
+            }
         }
     })
 }
@@ -73,7 +147,7 @@ function parseData(data) {
 // Получить данный об одной вебм с сервера через get запрос и затем нужные элементы
 // node - figure.image селектор
 function getOneWEBMData(node) {
-    var div = node.querySelector('div');
+    var div = node.querySelector('div.image-link');
     var a = div.querySelector('a');
     var md5 = div.id.split('-').pop();
     var url = encodeURIComponent(qualifyURL(a.getAttribute('href')));
@@ -104,10 +178,11 @@ function getAllWEBMData(nodes) {
                 if (window.webm_data[md5] === undefined) {
                     window.webm_data[md5] = {elems: [], data: {}};
                 }
-                window.webm_data[md5].elems.push(node);
+                // Добавляем флаг processed чтобы по два раза не обрабатывать одни и те же ноды.
+                window.webm_data[md5].elems.push({node: node, processed: false});
                 data.push(webm);
             } else {
-                setMessage(node, 'Слишком большой размер', 'orange')
+                setWEBMPanel({node, message: 'Слишком большой размер'})
             }
         }
     });
