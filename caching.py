@@ -63,8 +63,9 @@ def incr_views(md5):
     """
     :return: True if increased, False if failed
     """
-    try:
+    r_type = r.type(md5)
+    print(md5, r_type)  # TODO: Если нет в кэше, загрузить и увеличить счетчик.
+    if r_type == 'hash':
         r.hincrby(md5, 'views')
         return True
-    except Exception as e:
-        return False
+    return False

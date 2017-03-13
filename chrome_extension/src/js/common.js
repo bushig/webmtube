@@ -6,6 +6,22 @@ function qualifyURL(url) {
     a.href = url;
     return a.href;
 }
+// При наведении должен делаться  запрос на сервер
+function OneWEBMListener(event) {
+    event.target.removeEventListener('mouseenter', OneWEBMListener);
+    const node = event.target;
+    setTimeout(getOneWEBMData, 2000, node);
+}
+function increaseViewsListener(event) {
+    event.target.removeEventListener('click', increaseViewsListener);
+    const md5 = event.target.md5;
+    var request = new Request(`https://devshaft.ru/check/${md5}/view`, {
+        method: 'GET',
+        mode: 'cors'
+    });
+    fetch(request);
+}
+
 // Создаем панель если ее нет и в ней размещаем всю информацию
 function setWEBMPanel({node, screamChance, views, likes, dislikes, message} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
     let panel = node.querySelector('figcaption > .webm-panel');
@@ -40,11 +56,12 @@ function setViews(panel, views) {
         views_elem.className = 'views';
 
         createIcon(views_elem, 'eye');
-
+        let text_el = document.createElement('span');
+        views_elem.appendChild(text_el);
         panel.appendChild(views_elem);
     }
-    const text = document.createTextNode(views);
-    views_elem.appendChild(text);
+    let text_el = views_elem.querySelector('span');
+    text_el.innerText = views;
 }
 //Sets message of webm, accepts webm-panel selector and text
 function setMessage(panel, text) {
@@ -63,14 +80,9 @@ function setMessage(panel, text) {
 // Отвечает за увеличение счетчика просмотров
 function setViewListener(node, md5) {
     var img = node.querySelector('img.preview');
-    img.addEventListener('click', function increaseViewsListener(event) {
-        event.target.removeEventListener('click', increaseViewsListener);
-        var request = new Request(`https://devshaft.ru/check/${md5}/view`, {
-            method: 'GET',
-            mode: 'cors'
-        });
-        fetch(request);
-    });
+    img.removeEventListener('click', increaseViewsListener);
+    img.md5 = md5;
+    img.addEventListener('click', increaseViewsListener);
 }
 
 // Красит элемент в нужный цвет в зависимости от шанса скримера
@@ -83,23 +95,23 @@ function setScreamColor(node, panel, screamChance) {
     }
     const img = node.querySelector('.webm-file');
     if (screamChance == null) {
-        img.className += 'blue-shadow ';
+        img.className += ' blue-shadow ';
         scream.style.background = '#3DBFFF';
         createIcon(scream, 'volume-mute');
     } else if (screamChance == 0) {
-        img.className += 'green-shadow ';
+        img.className += ' green-shadow ';
         scream.style.background = '#45D754';
         createIcon(scream, 'volume-low');
     } else if (screamChance == 0.5) {
-        img.className += 'yellow-shadow ';
+        img.className += ' yellow-shadow ';
         scream.style.background = 'yellow';
         createIcon(scream, 'volume-medium');
     } else if (screamChance == 0.8) {
-        img.className += 'orange-shadow ';
+        img.className += ' orange-shadow ';
         scream.style.background = 'orange';
         createIcon(scream, 'volume-high');
     } else if (screamChance == 1.0) {
-        img.className += 'red-shadow ';
+        img.className += ' red-shadow ';
         scream.style.background = 'red';
         createIcon(scream, 'volume-scream');
     }
@@ -122,24 +134,17 @@ function parseData(data) {
     // if(nodes.length>1){
     //     console.log(nodes);
     // }
-    nodes.forEach((node_info, index)=> {
-        const node = node_info.node;
-        const processed = node_info.processed;
+    nodes.forEach((node)=> {
         // Обрабатываем только новые ноды
-        if (!processed) {
-            window.webm_data[md5].elems[index].processed = true;
-            if (data.message) {
-                console.log(data.message);
-                setWEBMPanel({node, message: data.message});
-                node.addEventListener('mouseenter', function OneWEBMListener(event) {
-                    event.target.removeEventListener('mouseenter', OneWEBMListener);
-                    setTimeout(getOneWEBMData, 5000, node);
-                })
-            } else {
-                var screamChance = data["screamer_chance"];
-                setWEBMPanel({node, screamChance: screamChance, views: data.views, message: null});
-                setViewListener(node, data.md5);
-            }
+        if (data.message) {
+            console.log(data.message);
+            setWEBMPanel({node, message: data.message});
+            node.removeEventListener('mouseenter', OneWEBMListener);
+            node.addEventListener('mouseenter', OneWEBMListener);
+        } else {
+            var screamChance = data["screamer_chance"];
+            setWEBMPanel({node, screamChance: screamChance, views: data.views, message: null});
+            setViewListener(node, data.md5);
         }
     })
 }
@@ -178,8 +183,7 @@ function getAllWEBMData(nodes) {
                 if (window.webm_data[md5] === undefined) {
                     window.webm_data[md5] = {elems: [], data: {}};
                 }
-                // Добавляем флаг processed чтобы по два раза не обрабатывать одни и те же ноды.
-                window.webm_data[md5].elems.push({node: node, processed: false});
+                window.webm_data[md5].elems.push(node);
                 data.push(webm);
             } else {
                 setWEBMPanel({node, message: 'Слишком большой размер'})
