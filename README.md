@@ -1,6 +1,4 @@
-# WEBMtube
-<a href="https://chrome.google.com/webstore/detail/screamer-detector/fifogepncaogafigddbpgmjchmellldl"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" width="24" /></a>
-
+# WEBMtube <a href="https://chrome.google.com/webstore/detail/screamer-detector/fifogepncaogafigddbpgmjchmellldl"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" width="24" /></a>
 Service to detect screamers on 2ch.hk
 
 #Requirements
