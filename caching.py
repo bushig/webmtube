@@ -69,3 +69,19 @@ def incr_views(md5):
         r.hincrby(md5, 'views')
         return True
     return False
+
+
+def incr_likes(md5):
+    r_type = r.type(md5)
+    if r_type == 'hash':
+        r.hincrby(md5, 'likes')
+        return True
+    return False
+
+
+def incr_dislikes(md5):
+    r_type = r.type(md5)
+    if r_type == 'hash':
+        r.hincrby(md5, 'dislikes')
+        return True
+    return False
