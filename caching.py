@@ -85,3 +85,28 @@ def incr_dislikes(md5):
         r.hincrby(md5, 'dislikes')
         return True
     return False
+
+
+def like_webm(md5, ip, action):
+    # Если все прошло удачно - вернуть словарь с количеством лайков/дизлайков, иначе вернуть None
+    # в ip:127.0.0.1 хранится хэш вида {viewed:{ISO TIME} action:{nil, like or dislike}}
+    r_type = r.type(md5)
+    if r_type == 'hash':
+        ip_action = r.hget('ip:' + ip + ":" + md5, 'action')
+        # Убираем лайк
+        if action == ip_action:
+            r.hincrby(md5, action + 's', -1)
+            r.hset('ip:' + ip + ":" + md5, 'action', None)
+            action = None
+        # Спокойно ставим лайк
+        elif ip_action is None:
+            r.hincrby(md5, action + 's')
+            r.hset('ip:' + ip + ":" + md5, 'action', action)
+        # Убираем одно действие и ставим другое
+        else:
+            r.hincrby(md5, action + 's')
+            r.hincrby(md5, ip_action + 's', -1)
+            r.hset('ip:' + ip + ":" + md5, 'action', action)
+        result = r.hmget(md5, ('likes', 'dislikes'))
+        return {'likes': result[0], 'dislikes': result[1], 'action': action}
+    return

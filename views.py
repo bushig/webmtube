@@ -1,13 +1,13 @@
-import json
+import logging
 
 import falcon
-import redis
 from falcon import status_codes
-import logging
+import redis
+
 from models import Session, WEBM
 from utils import is_valid_2ch_url
 from tasks import analyse_video
-from caching import set_cache_delayed, get_cache, set_cache, incr_views
+from caching import set_cache_delayed, get_cache, set_cache, incr_views, like_webm
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 falcon_log = logging.getLogger('falcon')
@@ -116,4 +116,34 @@ class ViewWEBMResource:
         if succeed:
             response.status = status_codes.HTTP_200
         else:
+            response.status = status_codes.HTTP_409
             request.context['result'] = {"message": "Ошибка"}  # TODO: make NO WEBM IN REDIS error
+
+
+class LikeResource:
+    def on_post(self, request, response, md5):
+        ip = request.remote_addr
+        data = like_webm(md5, ip, 'like')
+        if data:
+            response.status = status_codes.HTTP_200
+            request.context['result'] = data
+        else:
+            response.status = status_codes.HTTP_409
+            request.context['result'] = {"message": "Нет такой WEBM в кэше"}
+
+
+class DislikeResource:
+    def on_post(self, request, response, md5):
+        ip = request.remote_addr
+        data = like_webm(md5, ip, 'dislike')
+        if data:
+            response.status = status_codes.HTTP_200
+            request.context['result'] = data
+        else:
+            response.status = status_codes.HTTP_409
+            request.context['result'] = {"message": "Нет такой WEBM в кэше"}
+
+            # class GetLikesResource:
+            #     # TODO: Взять для всех мд5 информацию о том лайкал он или нет. На фронте кэшировать чтобы не делать лишние запросы.
+            #     def on_post:
+            #         pass

@@ -1,15 +1,15 @@
 # _*_ coding:utf-8 _*_
 import atexit
+import os
+import logging
+from logging.handlers import TimedRotatingFileHandler
 
 import falcon
 from falcon_cors import CORS
-from views import ScreamerResource, ViewWEBMResource
+
+from views import ScreamerResource, ViewWEBMResource, LikeResource, DislikeResource
 from models import Base, engine
 from middleware import RequireJSON, JSONTranslator
-import os
-# from wsgiref import simple_server
-import logging
-from logging.handlers import TimedRotatingFileHandler
 from config import LOGGING_CELERY_FILE, LOGGING_FALCON_FILE, LOGGING_PATH, LOG_LEVEL
 from utils import before_shutdown_handler
 
@@ -46,9 +46,14 @@ app = falcon.API(middleware=[cors.middleware, RequireJSON(), JSONTranslator()])
 # Resources for API
 screamer_resource = ScreamerResource()
 view_webm_resource = ViewWEBMResource()
+like_resource = LikeResource()
+dislike_resource = DislikeResource()
+
 # TODO: To get user real ip reconfigure nginix according to http://docs.gunicorn.org/en/stable/deploy.html (set X-Forwarded-For header)
 # Routing
 app.add_route('/check', screamer_resource)
 app.add_route('/check/{md5}/view', view_webm_resource)
+app.add_route('/check/{md5}/like', like_resource)
+app.add_route('/check/{md5}/dislike', dislike_resource)
 
 atexit.register(before_shutdown_handler)
