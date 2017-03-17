@@ -24,6 +24,10 @@
     -webkit-font-smoothing: antialiased;
 }
 
+.rating > span > .glyphicon:hover {
+    filter: blur(1px);
+}
+
 .spin {
     animation: spin 2s linear infinite;
 }
@@ -40,6 +44,14 @@
 .webm-panel > span + span {
     font-size: 14px;
     color: black;
+}
+
+.rating > span + span::before {
+    content: "|";
+    color: black;
+    font-size: 14px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .webm-panel > span + span::before {

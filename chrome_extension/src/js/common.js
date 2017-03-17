@@ -23,7 +23,7 @@ function increaseViewsListener(event) {
 }
 
 // Создаем панель если ее нет и в ней размещаем всю информацию
-function setWEBMPanel({node, screamChance, views, likes, dislikes, message} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
+function setWEBMPanel({node, screamChance, views, likes, dislikes, action, message} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
     let panel = node.querySelector('figcaption > .webm-panel');
     if (panel === null) {
         panel = document.createElement('div');
@@ -37,16 +37,45 @@ function setWEBMPanel({node, screamChance, views, likes, dislikes, message} ={})
     if (views !== undefined) {
         setViews(panel, views);
     }
-    if (likes !== undefined) {
-        // setLikes(panel, likes)
-    }
-    if (dislikes !== undefined) {
-        // setDislikes(panel, dislikes);
+    if (likes !== undefined && dislikes !== undefined) {
+        setLikesPanel(panel, likes, dislikes, action)
     }
     if (message !== undefined) {
         setMessage(panel, message);
     }
 
+}
+
+function setLikesPanel(panel, likes, dislikes, action = null) {
+    let ratingPanel = panel.querySelector('span.rating');
+    if (ratingPanel === null) {
+        ratingPanel = document.createElement('span');
+        ratingPanel.className = 'rating';
+        panel.appendChild(ratingPanel);
+
+        let likesSpan = document.createElement('span');
+        createLikeIcon(likesSpan, 'like', action);
+        let likeCounter = document.createTextNode(likes);
+        likesSpan.appendChild(likeCounter);
+        ratingPanel.appendChild(likesSpan);
+
+        let dislikesSpan = document.createElement('span');
+        createLikeIcon(dislikesSpan, 'dislike', action);
+        let dislikeCounter = document.createTextNode(dislikes);
+        dislikesSpan.appendChild(dislikeCounter);
+        ratingPanel.appendChild(dislikesSpan);
+    } else {
+        //TODO: COMPLETE
+    }
+
+}
+
+function createLikeIcon(panel, cls, action) {
+    if (action === cls) {
+        createIcon(panel, cls + '-active');
+    } else {
+        createIcon(panel, cls);
+    }
 }
 
 function setViews(panel, views) {
@@ -143,7 +172,14 @@ function parseData(data) {
             node.addEventListener('mouseenter', OneWEBMListener);
         } else {
             var screamChance = data["screamer_chance"];
-            setWEBMPanel({node, screamChance: screamChance, views: data.views, message: null});
+            setWEBMPanel({
+                node,
+                screamChance: screamChance,
+                views: data.views,
+                likes: data.likes,
+                dislikes: data.dislikes,
+                message: null
+            });
             setViewListener(node, data.md5);
         }
     })

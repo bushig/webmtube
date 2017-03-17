@@ -7,7 +7,9 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "activeTab"
+    "webRequest",
+    "activeTab",
+    "<all_urls>"
   ],
   "content_scripts": [
     {

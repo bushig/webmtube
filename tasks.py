@@ -1,5 +1,5 @@
+import celery
 from celery import Celery
-from urllib.error import URLError
 import logging
 from config import BROKER
 from models import WEBM, Session
@@ -13,7 +13,13 @@ app = Celery('tasks', broker=BROKER)
 celery_log = logging.getLogger('celery')
 
 
-@app.task(autoretry_for=(URLError,), ignore_result=True)
+class BaseTaskHandler(celery.Task):
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        print('Произошла ошибка во время выполнения Таска, удаляем кэш')
+        del_cache(args[0])
+
+
+@app.task(base=BaseTaskHandler, ignore_result=True)
 def analyse_video(md5, url):# TODO: Rename to smth
     try:
         celery_log.info('Downloading new video with url of %s' % (url,))

@@ -111,7 +111,16 @@ class ScreamerResource:
 
 
 class ViewWEBMResource:
+    # TODO: Убрать в следущей версии
     def on_get(self, request, response, md5):
+        succeed = incr_views(md5)
+        if succeed:
+            response.status = status_codes.HTTP_200
+        else:
+            response.status = status_codes.HTTP_409
+            request.context['result'] = {"message": "Ошибка"}  # TODO: make NO WEBM IN REDIS error
+
+    def on_post(self, request, response, md5):
         succeed = incr_views(md5)
         if succeed:
             response.status = status_codes.HTTP_200
@@ -122,7 +131,10 @@ class ViewWEBMResource:
 
 class LikeResource:
     def on_post(self, request, response, md5):
-        ip = request.remote_addr
+        ip = request.access_route[
+            0]  # TODO: IP можно подделать в хедере + могут иногда быть значения unknown и obfuscated
+        # Возможно сделать валидацию и, на всякий случай, исключить локалхост
+        print('Like from ip: ', ip)
         data = like_webm(md5, ip, 'like')
         if data:
             response.status = status_codes.HTTP_200
@@ -134,7 +146,8 @@ class LikeResource:
 
 class DislikeResource:
     def on_post(self, request, response, md5):
-        ip = request.remote_addr
+        ip = request.access_route[0]
+        print('Dislike from ip: ', ip)
         data = like_webm(md5, ip, 'dislike')
         if data:
             response.status = status_codes.HTTP_200
@@ -143,7 +156,7 @@ class DislikeResource:
             response.status = status_codes.HTTP_409
             request.context['result'] = {"message": "Нет такой WEBM в кэше"}
 
-            # class GetLikesResource:
-            #     # TODO: Взять для всех мд5 информацию о том лайкал он или нет. На фронте кэшировать чтобы не делать лишние запросы.
-            #     def on_post:
-            #         pass
+# class GetLikesResource:
+#     # TODO: Взять для всех мд5 информацию о том лайкал он или нет. На фронте кэшировать чтобы не делать лишние запросы.
+#     def on_post:
+#         pass

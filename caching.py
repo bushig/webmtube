@@ -70,23 +70,6 @@ def incr_views(md5):
         return True
     return False
 
-
-def incr_likes(md5):
-    r_type = r.type(md5)
-    if r_type == 'hash':
-        r.hincrby(md5, 'likes')
-        return True
-    return False
-
-
-def incr_dislikes(md5):
-    r_type = r.type(md5)
-    if r_type == 'hash':
-        r.hincrby(md5, 'dislikes')
-        return True
-    return False
-
-
 def like_webm(md5, ip, action):
     # Если все прошло удачно - вернуть словарь с количеством лайков/дизлайков, иначе вернуть None
     # в ip:127.0.0.1 хранится хэш вида {viewed:{ISO TIME} action:{nil, like or dislike}}
