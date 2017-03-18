@@ -1,7 +1,7 @@
 {
   "name": "webmtube_extension",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.4",
+  "description": "Анализирует WEBM файлы на 2ch.hk и показывает являются ли они скримерами.",
   "scripts": {
     "build": "node utils/build.js",
     "start": "node utils/webserver.js"

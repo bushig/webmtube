@@ -1,10 +1,8 @@
 {
   "manifest_version": 2,
   "name": "WEBMtube",
-  "description": "Анализирует WEBM файлы на 2ch.hk и показывает являются ли они скримерами.",
   "author": "bushig",
   "homepage_url": "https://github.com/bushig/webmtube",
-  "version": "0.1.0",
   "browser_action": {
     "default_icon": "/icons/icon-64.png",
     "default_popup": "popup.html",
@@ -12,12 +10,13 @@
   },
   "permissions": [
     "activeTab",
-    "<all_urls>"
+    "*://devshaft.ru/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "*://2ch.hk/*"
+        "*://2ch.hk/*",
+        "*://2ch.pm/*"
       ],
       "js": [
         "main.bundle.js"
@@ -28,11 +27,16 @@
     }
   ],
   "icons": {
-    "48": "/icons/icon-48.png",
-    "96": "icons/icon-96.png",
+    "48": "/icons/icon-128.png",
+    "96": "icons/icon-128.png",
     "128": "icons/icon-128.png"
   },
   "web_accessible_resources": [
     "icons/*.svg"
-  ]
+  ],
+  "applications": {
+    "gecko": {
+      "strict_min_version": "48.0"
+    }
+  }
 }

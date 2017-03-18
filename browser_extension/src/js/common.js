@@ -184,14 +184,14 @@ function createIcon(node, name) {
         icon.className = 'glyphicon';
         node.appendChild(icon);
     }
-    icon.setAttribute('src', chrome.runtime.getURL('icons/' + name + '.svg'));
+    icon.setAttribute('src', browser.runtime.getURL('icons/' + name + '.svg'));
 }
 // В зависимости от полученных с сервера данных обрабатывает посты в треде
 // data - объект с данными одной webm
 function parseData(data) {
     let md5 = data.md5;
     // Значит есть информация о лайках - Обновить только ее
-    if (data.action) {
+    if (data.action || data.action === null) {
         window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
     } else {
         window.webm_data[md5].data = data;

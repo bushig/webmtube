@@ -2,6 +2,9 @@ import threadHandler from './thread'
 import threadListHandler from './threadList'
 import {BOARDS} from "./config"
 
+// Полифил чтобы работал Firefox
+global.browser = global.chrome;
+
 //Смотрим находимся ли мы в треде или на главной странице борды
 const curr_url = window.location.pathname;
 const pathArray = curr_url.split('/');
@@ -9,7 +12,6 @@ const currBoard = pathArray[1];
 // Если мы не на главной странице и доска поддерживается, то включаем скрипт
 console.log(currBoard);
 console.log(pathArray.length);
-
 if (currBoard && BOARDS.indexOf(currBoard) !== -1) {
     //Если в списке тредов
     if (pathArray.length == 3) {
