@@ -23,7 +23,7 @@ function increaseViewsListener(event) {
 }
 
 // Создаем панель если ее нет и в ней размещаем всю информацию
-function setWEBMPanel({node, screamChance, views, likes, dislikes, action, message} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
+function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, message} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
     let panel = node.querySelector('figcaption > .webm-panel');
     if (panel === null) {
         panel = document.createElement('div');
@@ -38,15 +38,14 @@ function setWEBMPanel({node, screamChance, views, likes, dislikes, action, messa
         setViews(panel, views);
     }
     if (likes !== undefined && dislikes !== undefined) {
-        setLikesPanel(panel, likes, dislikes, action)
+        setLikesPanel(panel, md5, likes, dislikes, action)
     }
     if (message !== undefined) {
         setMessage(panel, message);
     }
-
 }
 
-function setLikesPanel(panel, likes, dislikes, action = null) {
+function setLikesPanel(panel, md5 = null, likes, dislikes, action = null) {
     let ratingPanel = panel.querySelector('span.rating');
     if (ratingPanel === null) {
         ratingPanel = document.createElement('span');
@@ -58,16 +57,44 @@ function setLikesPanel(panel, likes, dislikes, action = null) {
         let likeCounter = document.createTextNode(likes);
         likesSpan.appendChild(likeCounter);
         ratingPanel.appendChild(likesSpan);
+        setLikesListener(likesSpan.childNodes[0], md5, 'like');
 
         let dislikesSpan = document.createElement('span');
         createLikeIcon(dislikesSpan, 'dislike', action);
         let dislikeCounter = document.createTextNode(dislikes);
         dislikesSpan.appendChild(dislikeCounter);
         ratingPanel.appendChild(dislikesSpan);
+        setLikesListener(dislikesSpan.childNodes[0], md5, 'dislike');
     } else {
-        //TODO: COMPLETE
+        let [likesSpan, dislikesSpan] = ratingPanel.querySelectorAll('span');
+
+        createLikeIcon(likesSpan, 'like', action);
+        likesSpan.childNodes[1].nodeValue = likes;
+
+        createLikeIcon(dislikesSpan, 'dislike', action);
+        dislikesSpan.childNodes[1].nodeValue = dislikes;
     }
 
+}
+
+// Отвечает за отправку запроса на сервер(лайки и дизлайки) и установку новых иконок и счетчика лайков
+// TODO: Проверить убираются ли EventListeners сборщиком мусора при замене иконок
+function setLikesListener(node, md5, action_type) {
+    node.addEventListener('click', function (event) {
+        let requestHeader = new Headers();
+        requestHeader.append('Content-Type', 'application/json');
+        requestHeader.append('Accept', 'application/json');
+        let request = new Request(`https://devshaft.ru/check/${md5}/${action_type}`, {
+            headers: requestHeader,
+            method: 'POST',
+            mode: 'cors'
+        });
+        fetch(request).then((resp)=> {
+            return resp.json()
+        }).then((data) => {
+            parseData(data);
+        });
+    })
 }
 
 function createLikeIcon(panel, cls, action) {
@@ -157,12 +184,14 @@ function createIcon(node, name) {
 // В зависимости от полученных с сервера данных обрабатывает посты в треде
 // data - объект с данными одной webm
 function parseData(data) {
-    var md5 = data.md5;
-    window.webm_data[md5].data = data;
-    var nodes = window.webm_data[md5].elems;
-    // if(nodes.length>1){
-    //     console.log(nodes);
-    // }
+    let md5 = data.md5;
+    // Значит есть информация о лайках - Обновить только ее
+    if (data.action) {
+        window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
+    } else {
+        window.webm_data[md5].data = data;
+    }
+    let nodes = window.webm_data[md5].elems;
     nodes.forEach((node)=> {
         // Обрабатываем только новые ноды
         if (data.message) {
@@ -174,10 +203,12 @@ function parseData(data) {
             var screamChance = data["screamer_chance"];
             setWEBMPanel({
                 node,
+                md5: data.md5,
                 screamChance: screamChance,
                 views: data.views,
                 likes: data.likes,
                 dislikes: data.dislikes,
+                action: data.action,
                 message: null
             });
             setViewListener(node, data.md5);
@@ -240,7 +271,7 @@ function getAllWEBMData(nodes) {
         body: JSON.stringify(data)
     });
     fetch(request).then(function (resp) {
-        console.log(resp);
+        // console.log(resp);
         return resp.json()
     }).then(function (json) {
         json.forEach(function (data) {

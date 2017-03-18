@@ -91,5 +91,5 @@ def like_webm(md5, ip, action):
             r.hincrby(md5, ip_action + 's', -1)
             r.hset('ip:' + ip + ":" + md5, 'action', action)
         result = r.hmget(md5, ('likes', 'dislikes'))
-        return {'likes': result[0], 'dislikes': result[1], 'action': action}
+        return {'md5': md5, 'likes': result[0], 'dislikes': result[1], 'action': action}
     return

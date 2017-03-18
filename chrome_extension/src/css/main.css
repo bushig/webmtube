@@ -28,6 +28,11 @@
     filter: blur(1px);
 }
 
+.rating > span > .glyphicon {
+    width: 20px;
+    height: 20px;
+}
+
 .spin {
     animation: spin 2s linear infinite;
 }
@@ -47,8 +52,8 @@
 }
 
 .rating > span + span::before {
-    content: "|";
-    color: black;
+    content: "";
+    color: grey;
     font-size: 14px;
     padding-left: 2px;
     padding-right: 2px;
@@ -56,7 +61,7 @@
 
 .webm-panel > span + span::before {
     content: "|";
-    color: grey;
+    color: black;
     font-size: 14px;
     padding-left: 2px;
     padding-right: 2px;
