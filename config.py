@@ -2,7 +2,7 @@ from os import path
 
 # 2CH URL
 DVACH_DOMAINS = ('2ch.hk',)
-ALLOWED_BOARDS = ('b', 'gd', "pr")
+ALLOWED_BOARDS = ('b', 'gd', "pr", 'mlp')
 MAX_SIZE = 22000000  # 22MB
 
 BASE_DIR = path.abspath('')

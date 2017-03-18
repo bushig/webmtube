@@ -15,8 +15,13 @@ function OneWEBMListener(event) {
 function increaseViewsListener(event) {
     event.target.removeEventListener('click', increaseViewsListener);
     const md5 = event.target.md5;
+    let requestHeader = new Headers();
+    requestHeader.append('Content-Type', 'application/json');
+    requestHeader.append('Accept', 'application/json');
+
     var request = new Request(`https://devshaft.ru/check/${md5}/view`, {
-        method: 'GET',
+        headers: requestHeader,
+        method: 'POST',
         mode: 'cors'
     });
     fetch(request);

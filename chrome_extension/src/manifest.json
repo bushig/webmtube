@@ -1,13 +1,16 @@
 {
   "manifest_version": 2,
-  "name": "Screamer Detector",
+  "name": "WEBMtube",
   "description": "Анализирует WEBM файлы на 2ch.hk и показывает являются ли они скримерами.",
-  "version": "0.0.2",
+  "author": "bushig",
+  "homepage_url": "https://github.com/bushig/webmtube",
+  "version": "0.1.0",
   "browser_action": {
-    "default_popup": "popup.html"
+    "default_icon": "/icons/icon-64.png",
+    "default_popup": "popup.html",
+    "browser_style": true
   },
   "permissions": [
-    "webRequest",
     "activeTab",
     "<all_urls>"
   ],

@@ -1,6 +1,6 @@
 {
   "name": "webmtube_extension",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "",
   "scripts": {
     "build": "node utils/build.js",
