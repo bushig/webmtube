@@ -1,7 +1,7 @@
 from os import path
 
 # 2CH URL
-DVACH_DOMAINS = ('2ch.hk', '2ch.pm')
+DVACH_DOMAINS = ('2ch.hk', '2ch.pm', '2ch.re', '2ch.tf', '2ch.wf', '2ch.yt', '2-ch.so')
 ALLOWED_BOARDS = ('b', 'gd', "pr", 'mlp')
 MAX_SIZE = 22000000  # 22MB
 
