@@ -131,7 +131,8 @@ class ViewWEBMResource:
 
 class LikeResource:
     def on_post(self, request, response, md5):
-        ip = request.remote_addr  # TODO: IP можно подделать в хедере + могут иногда быть значения unknown и obfuscated
+        ip = request.access_route[
+            -1]  # TODO: IP можно подделать в хедере + могут иногда быть значения unknown и obfuscated
         # Возможно сделать валидацию и, на всякий случай, исключить локалхост
         print('Like from ip: ', ip)
         data = like_webm(md5, ip, 'like')
@@ -145,7 +146,7 @@ class LikeResource:
 
 class DislikeResource:
     def on_post(self, request, response, md5):
-        ip = request.remote_addr
+        ip = request.access_route[-1]
         print('Dislike from ip: ', ip)
         data = like_webm(md5, ip, 'dislike')
         if data:

@@ -10,11 +10,36 @@ function qualifyURL(url) {
 function OneWEBMListener(event) {
     event.target.removeEventListener('mouseenter', OneWEBMListener);
     const node = event.target;
-    setTimeout(getOneWEBMData, 2000, node);
+    let time = event.target.time;
+
+    if (time === undefined) {
+        event.target.time = 4;
+        time = 0;
+    }
+
+    function checkTime() {
+        if (time > 0) {
+            setWEBMPanel({node: node, message: "Секунд до обновления: " + time});
+            time--;
+            // event.target.time = time;
+        } else {
+            clearInterval(intervID);
+            event.target.time = 4;
+            getOneWEBMData(node);
+        }
+    }
+
+    // При первом наведении делать запрос, далее добавить таймер
+    const intervID = setInterval(checkTime, 1000);
+    checkTime();
+
 }
 function increaseViewsListener(event) {
     event.target.removeEventListener('click', increaseViewsListener);
     const md5 = event.target.md5;
+    if (!md5) {
+        console.log(md5, event.target);
+    }
     let requestHeader = new Headers();
     requestHeader.append('Content-Type', 'application/json');
     requestHeader.append('Accept', 'application/json');
@@ -140,6 +165,9 @@ function setMessage(panel, text) {
 
 // Отвечает за увеличение счетчика просмотров
 function setViewListener(node, md5) {
+    if (!md5) {
+        console.log(node);
+    }
     var img = node.querySelector('img.preview');
     img.removeEventListener('click', increaseViewsListener);
     img.md5 = md5;
@@ -206,6 +234,7 @@ function parseData(data) {
             node.addEventListener('mouseenter', OneWEBMListener);
         } else {
             var screamChance = data["screamer_chance"];
+            node.removeEventListener('mouseenter', OneWEBMListener);
             setWEBMPanel({
                 node,
                 md5: data.md5,
@@ -216,7 +245,7 @@ function parseData(data) {
                 action: data.action,
                 message: null
             });
-            setViewListener(node, data.md5);
+            setViewListener(node, md5);
         }
     })
 }

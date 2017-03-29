@@ -16,12 +16,7 @@
     {
       "matches": [
         "*://2ch.hk/*",
-        "*://2ch.pm/*",
-        "*://2ch.re/*",
-        "*://2ch.tf/*",
-        "*://2ch.wf/*",
-        "*://2ch.yt/*",
-        "*://2-ch.so/*"
+        "*://2ch.pm/*"
       ],
       "js": [
         "main.bundle.js"
@@ -38,10 +33,5 @@
   },
   "web_accessible_resources": [
     "icons/*.svg"
-  ],
-  "applications": {
-    "gecko": {
-      "strict_min_version": "48.0"
-    }
-  }
+  ]
 }

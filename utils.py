@@ -45,7 +45,7 @@ def download_file(url):
         u = urlopen(url)
     except URLError as e:
         print("Error: {} while opening webm url: {}".format(e, url))
-        raise URLError('Ошибка при открытии ссылки')
+        raise URLError('Link open error')
 
     file_size = int(u.getheader("Content-Length"))
     if file_size > MAX_SIZE:
