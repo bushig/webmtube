@@ -17,6 +17,7 @@ if (fileSystem.existsSync(secretsPath)) {
 module.exports = {
     entry: {
         popup: path.join(__dirname, "src", "js", "popup.js"),
+        options: path.join(__dirname, "src", "js", "options.js"),
         main: path.join(__dirname, "src", "js", "main.js"),
     },
     output: {
@@ -41,6 +42,11 @@ module.exports = {
             template: path.join(__dirname, "src", "popup.html"),
             filename: "popup.html",
             chunks: ["popup"]
+        }),
+        new HtmlWebpackPlugin({
+            template: path.join(__dirname, "src", "options.html"),
+            filename: "options.html",
+            chunks: ["options"]
         }),
         new WriteFilePlugin(),
         new CopyWebpackPlugin([

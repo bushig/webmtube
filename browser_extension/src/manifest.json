@@ -10,6 +10,7 @@
   },
   "permissions": [
     "activeTab",
+    "storage",
     "*://devshaft.ru/*"
   ],
   "content_scripts": [
@@ -26,6 +27,9 @@
       ]
     }
   ],
+  "options_ui": {
+    "page": "options.html"
+  },
   "icons": {
     "48": "/icons/icon-128.png",
     "96": "icons/icon-128.png",
