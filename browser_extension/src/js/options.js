@@ -1,3 +1,8 @@
+import {DEFAULT_SETTINGS} from './config'
+
+// Полифил чтобы работал Firefox
+global.browser = global.chrome;
+
 // Saves options to chrome.storage
 function save_options() {
     let highlight = document.getElementById('highlight').checked;
@@ -17,9 +22,8 @@ function save_options() {
 // stored in chrome.storage.
 function restore_options() {
     // Use default value color = 'red' and likesColor = true.
-    chrome.storage.sync.get({
-        alwaysHighlight: false
-    }, function (items) {
+    chrome.storage.sync.get(DEFAULT_SETTINGS,
+        function (items) {
         console.log(items);
         document.getElementById('highlight').checked = items.alwaysHighlight;
     });

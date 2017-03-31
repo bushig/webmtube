@@ -1,4 +1,15 @@
-import {MAX_SIZE} from './config'
+import {MAX_SIZE, DEFAULT_SETTINGS} from './config'
+
+// Полифил чтобы работал Firefox
+global.browser = global.chrome;
+
+let settings =
+
+    browser.storage.sync.get(
+        DEFAULT_SETTINGS, function (items) {
+            console.log(items);
+            settings = items;
+        });
 
 // Function to get absolute url from relative
 function qualifyURL(url) {
@@ -183,24 +194,28 @@ function setScreamColor(node, panel, screamChance) {
         panel.appendChild(scream);
     }
     const img = node.querySelector('.webm-file');
+    let clsHighlight = " ";
+    if (settings.alwaysHighlight) {
+        clsHighlight = "-const ";
+    }
     if (screamChance == null) {
-        img.className += ' blue-shadow ';
+        img.className += ' blue-shadow' + clsHighlight;
         scream.style.background = '#3DBFFF';
         createIcon(scream, 'volume-mute');
     } else if (screamChance == 0) {
-        img.className += ' green-shadow ';
+        img.className += ' green-shadow' + clsHighlight;
         scream.style.background = '#45D754';
         createIcon(scream, 'volume-low');
     } else if (screamChance == 0.5) {
-        img.className += ' yellow-shadow ';
+        img.className += ' yellow-shadow' + clsHighlight;
         scream.style.background = 'yellow';
         createIcon(scream, 'volume-medium');
     } else if (screamChance == 0.8) {
-        img.className += ' orange-shadow ';
+        img.className += ' orange-shadow' + clsHighlight;
         scream.style.background = 'orange';
         createIcon(scream, 'volume-high');
     } else if (screamChance == 1.0) {
-        img.className += ' red-shadow ';
+        img.className += ' red-shadow' + clsHighlight;
         scream.style.background = 'red';
         createIcon(scream, 'volume-scream');
     }
