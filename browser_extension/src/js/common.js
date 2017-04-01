@@ -3,9 +3,7 @@ import {MAX_SIZE, DEFAULT_SETTINGS} from './config'
 // Полифил чтобы работал Firefox
 global.browser = global.chrome;
 
-let settings =
-
-    browser.storage.sync.get(
+let settings = browser.storage.sync.get(
         DEFAULT_SETTINGS, function (items) {
             console.log(items);
             settings = items;
@@ -48,9 +46,16 @@ function OneWEBMListener(event) {
 function increaseViewsListener(event) {
     event.target.removeEventListener('click', increaseViewsListener);
     const md5 = event.target.md5;
-    if (!md5) {
+    if (md5 === undefined) {
         console.log(md5, event.target);
+    } else {
+        let obj = {};
+        obj[md5] = true;
+        browser.storage.local.set(obj, function () {
+            console.log('Удачный просмотр');
+        });
     }
+
     let requestHeader = new Headers();
     requestHeader.append('Content-Type', 'application/json');
     requestHeader.append('Accept', 'application/json');
@@ -64,7 +69,7 @@ function increaseViewsListener(event) {
 }
 
 // Создаем панель если ее нет и в ней размещаем всю информацию
-function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, message} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
+function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, message, viewed} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
     let panel = node.querySelector('figcaption > .webm-panel');
     if (panel === null) {
         panel = document.createElement('div');
@@ -76,7 +81,7 @@ function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, 
         setScreamColor(node, panel, screamChance);
     }
     if (views !== undefined) {
-        setViews(panel, views);
+        setViews(panel, views, viewed);
     }
     if (likes !== undefined && dislikes !== undefined) {
         setLikesPanel(panel, md5, likes, dislikes, action)
@@ -146,11 +151,15 @@ function createLikeIcon(panel, cls, action) {
     }
 }
 
-function setViews(panel, views) {
+function setViews(panel, views, viewed) {
     let views_elem = panel.querySelector('span.views');
     if (views_elem === null) {
         views_elem = document.createElement('span');
-        views_elem.className = 'views';
+        if (viewed === true) {
+            views_elem.className = 'views-viewed';
+        } else {
+            views_elem.className = 'views';
+        }
 
         createIcon(views_elem, 'eye');
         let text_el = document.createElement('span');
@@ -233,6 +242,14 @@ function createIcon(node, name) {
 // data - объект с данными одной webm
 function parseData(data) {
     let md5 = data.md5;
+    let viewed = false; // Была ли уже просмотрена ШЕБМ
+    browser.storage.local.get(md5, function (info) {
+        // console.log('already viewed: ', info);
+        if (info[md5] === true) {
+            console.log(info);
+            viewed = true;
+        }
+    });
     // Значит есть информация о лайках - Обновить только ее
     if (data.action || data.action === null) {
         window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
@@ -258,7 +275,8 @@ function parseData(data) {
                 likes: data.likes,
                 dislikes: data.dislikes,
                 action: data.action,
-                message: null
+                message: null,
+                viewed: viewed
             });
             setViewListener(node, md5);
         }
