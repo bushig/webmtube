@@ -67,8 +67,9 @@
     padding-right: 2px;
 }
 
-.views-viewed {
-    background-color: red;
+.viewed {
+    background-color: #e68282;
+    border-radius: 5px;
 }
 
 .webm-file.blue-shadow:hover {

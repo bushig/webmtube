@@ -151,17 +151,17 @@ function createLikeIcon(panel, cls, action) {
     }
 }
 
-function setViews(panel, views, viewed) {
+function setViews(panel, views, viewed = false) {
     let views_elem = panel.querySelector('span.views');
     if (views_elem === null) {
         views_elem = document.createElement('span');
-        if (viewed === true) {
-            views_elem.className = 'views-viewed';
-        } else {
-            views_elem.className = 'views';
-        }
+        views_elem.className = 'views';
 
-        createIcon(views_elem, 'eye');
+        if (viewed === true) {
+            createIcon(views_elem, 'eye', 'viewed');
+        } else {
+            createIcon(views_elem, 'eye');
+        }
         let text_el = document.createElement('span');
         views_elem.appendChild(text_el);
         panel.appendChild(views_elem);
@@ -229,11 +229,14 @@ function setScreamColor(node, panel, screamChance) {
         createIcon(scream, 'volume-scream');
     }
 }
-function createIcon(node, name) {
+function createIcon(node, name, cls) {
     let icon = node.querySelector('img');
     if (icon === null) {
         icon = document.createElement('img');
         icon.className = 'glyphicon';
+        if (cls !== undefined) {
+            icon.className = icon.className + ' ' + cls;
+        }
         node.appendChild(icon);
     }
     icon.setAttribute('src', browser.runtime.getURL('icons/' + name + '.svg'));
@@ -244,43 +247,41 @@ function parseData(data) {
     let md5 = data.md5;
     let viewed = false; // Была ли уже просмотрена ШЕБМ
     browser.storage.local.get(md5, function (info) {
-        // console.log('already viewed: ', info);
         if (info[md5] === true) {
-            console.log(info);
             viewed = true;
         }
-    });
-    // Значит есть информация о лайках - Обновить только ее
-    if (data.action || data.action === null) {
-        window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
-    } else {
-        window.webm_data[md5].data = data;
-    }
-    let nodes = window.webm_data[md5].elems;
-    nodes.forEach((node)=> {
-        // Обрабатываем только новые ноды
-        if (data.message) {
-            console.log(data.message);
-            setWEBMPanel({node, message: data.message});
-            node.removeEventListener('mouseenter', OneWEBMListener);
-            node.addEventListener('mouseenter', OneWEBMListener);
+        // Значит есть информация о лайках - Обновить только ее
+        if (data.action || data.action === null) {
+            window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
         } else {
-            var screamChance = data["screamer_chance"];
-            node.removeEventListener('mouseenter', OneWEBMListener);
-            setWEBMPanel({
-                node,
-                md5: data.md5,
-                screamChance: screamChance,
-                views: data.views,
-                likes: data.likes,
-                dislikes: data.dislikes,
-                action: data.action,
-                message: null,
-                viewed: viewed
-            });
-            setViewListener(node, md5);
+            window.webm_data[md5].data = data;
         }
-    })
+        let nodes = window.webm_data[md5].elems;
+        nodes.forEach((node)=> {
+            // Обрабатываем только новые ноды
+            if (data.message) {
+                console.log(data.message);
+                setWEBMPanel({node, message: data.message});
+                node.removeEventListener('mouseenter', OneWEBMListener);
+                node.addEventListener('mouseenter', OneWEBMListener);
+            } else {
+                var screamChance = data["screamer_chance"];
+                node.removeEventListener('mouseenter', OneWEBMListener);
+                setWEBMPanel({
+                    node,
+                    md5: data.md5,
+                    screamChance: screamChance,
+                    views: data.views,
+                    likes: data.likes,
+                    dislikes: data.dislikes,
+                    action: data.action,
+                    message: null,
+                    viewed: viewed
+                });
+                setViewListener(node, md5);
+            }
+        })
+    });
 }
 
 // Получить данный об одной вебм с сервера через get запрос и затем нужные элементы
