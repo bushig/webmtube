@@ -52,7 +52,12 @@ function increaseViewsListener(event) {
         let obj = {};
         obj[md5] = true;
         browser.storage.local.set(obj, function () {
-            console.log('Удачный просмотр');
+            browser.storage.sync.get({'views': 0}, function (data) {
+                let viewsCount = data['views'] + 1;
+                browser.storage.sync.set({'views': viewsCount}, function () {
+                    console.log('Удачный просмотр');
+                })
+            })
         });
     }
 
