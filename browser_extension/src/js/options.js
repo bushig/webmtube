@@ -6,7 +6,7 @@ global.browser = global.chrome;
 // Saves options to chrome.storage
 function save_options() {
     let highlight = document.getElementById('highlight').checked;
-    chrome.storage.sync.set({
+    browser.storage.sync.set({
         alwaysHighlight: highlight
     }, function () {
         // Update status to let user know options were saved.
@@ -22,7 +22,7 @@ function save_options() {
 // stored in chrome.storage.
 function restore_options() {
     // Use default value color = 'red' and likesColor = true.
-    chrome.storage.sync.get(DEFAULT_SETTINGS,
+    browser.storage.sync.get(DEFAULT_SETTINGS,
         function (items) {
         console.log(items);
         document.getElementById('highlight').checked = items.alwaysHighlight;
@@ -30,9 +30,9 @@ function restore_options() {
 }
 
 function reset_stats() {
-    chrome.storage.local.clear(function () {
+    browser.storage.local.clear(function () {
         var status = document.getElementById('status');
-        status.textContent = 'Настройки сохранены.';
+        status.textContent = 'Статистика сброшена.';
         setTimeout(function () {
             status.textContent = '';
         }, 750);
