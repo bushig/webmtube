@@ -49,16 +49,31 @@ function increaseViewsListener(event) {
     if (md5 === undefined) {
         console.log(md5, event.target);
     } else {
-        let obj = {};
-        obj[md5] = true;
-        browser.storage.local.set(obj, function () {
-            browser.storage.sync.get({'views': 0}, function (data) {
-                let viewsCount = data['views'] + 1;
-                browser.storage.sync.set({'views': viewsCount}, function () {
-                    console.log('Удачный просмотр');
+        // Проверяем просмотрен ли ролик
+        browser.storage.local.get(md5, function (info) {
+            let obj = info[md5];
+            // Еще нет данных или еще не просмотрен
+            if (obj === undefined) {
+                obj = {};
+                obj.viewed = true;
+            } else if (obj.viewed !== true) {
+                Object.assign(obj, {viewed: true});
+            }
+            let req = {};
+            req[md5] = obj;
+            browser.storage.local.set(req, function () {
+                // Счетчик просмотров увеличиваем даже если до этого были просмотры.
+                browser.storage.sync.get({'views': 0}, function (data) {
+                    let viewsCount = data['views'] + 1;
+                    browser.storage.sync.set({'views': viewsCount}, function () {
+                        console.log('Удачный просмотр: ', obj);
+                        let webmData = window.webm_data[md5].data;
+                        console.log(webmData);
+                        parseData(Object.assign({}, webmData, {views: parseInt(webmData.views) + 1}), true);
+                    })
                 })
-            })
-        });
+            });
+        })
     }
 
     let requestHeader = new Headers();
@@ -143,7 +158,12 @@ function setLikesListener(node, md5, action_type) {
         fetch(request).then((resp)=> {
             return resp.json()
         }).then((data) => {
-            parseData(data);
+            let obj = {};
+            obj[md5] = null;
+            browser.storage.get(obj, function (storData) {
+                if (storData)
+                    parseData(data);
+            });
         });
     })
 }
@@ -170,6 +190,12 @@ function setViews(panel, views, viewed = false) {
         let text_el = document.createElement('span');
         views_elem.appendChild(text_el);
         panel.appendChild(views_elem);
+    } else {
+        if (viewed === true) {
+            createIcon(views_elem, 'eye', 'viewed');
+        } else {
+            createIcon(views_elem, 'eye');
+        }
     }
     let text_el = views_elem.querySelector('span');
     text_el.innerText = views;
@@ -239,27 +265,31 @@ function createIcon(node, name, cls) {
     if (icon === null) {
         icon = document.createElement('img');
         icon.className = 'glyphicon';
-        if (cls !== undefined) {
-            icon.className = icon.className + ' ' + cls;
-        }
         node.appendChild(icon);
+    }
+    if (cls !== undefined) {
+        icon.className = 'glyphicon ' + cls;
     }
     icon.setAttribute('src', browser.runtime.getURL('icons/' + name + '.svg'));
 }
 // В зависимости от полученных с сервера данных обрабатывает посты в треде
 // data - объект с данными одной webm
-function parseData(data) {
+function parseData(data, onlyRender = false) {
+    // TODO: Сделать отдельные функции для парсинга и для рендеринга
+    // Если стоит onlyRender не изменять данные в глобальном объекте
     let md5 = data.md5;
     let viewed = false; // Была ли уже просмотрена ШЕБМ
     browser.storage.local.get(md5, function (info) {
-        if (info[md5] === true) {
+        if (info[md5] && info[md5].viewed === true) {
             viewed = true;
         }
-        // Значит есть информация о лайках - Обновить только ее
-        if (data.action || data.action === null) {
-            window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
-        } else {
-            window.webm_data[md5].data = data;
+        if (onlyRender === false) {
+            // Значит есть информация о лайках - Обновить только ее
+            if (data.action || data.action === null) {
+                window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
+            } else {
+                window.webm_data[md5].data = data;
+            }
         }
         let nodes = window.webm_data[md5].elems;
         nodes.forEach((node)=> {

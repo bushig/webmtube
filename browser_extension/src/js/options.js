@@ -28,6 +28,18 @@ function restore_options() {
         document.getElementById('highlight').checked = items.alwaysHighlight;
     });
 }
+
+function reset_stats() {
+    chrome.storage.local.clear(function () {
+        var status = document.getElementById('status');
+        status.textContent = 'Настройки сохранены.';
+        setTimeout(function () {
+            status.textContent = '';
+        }, 750);
+    });
+}
 document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('save').addEventListener('click',
     save_options);
+document.getElementById('reset').addEventListener('click',
+    reset_stats);
