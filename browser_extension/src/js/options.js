@@ -31,11 +31,13 @@ function restore_options() {
 
 function reset_stats() {
     browser.storage.local.clear(function () {
-        var status = document.getElementById('status');
-        status.textContent = 'Статистика сброшена.';
-        setTimeout(function () {
-            status.textContent = '';
-        }, 750);
+        browser.storage.sync.clear(()=> {
+            var status = document.getElementById('status');
+            status.textContent = 'Статистика сброшена.';
+            setTimeout(function () {
+                status.textContent = '';
+            }, 750);
+        })
     });
 }
 document.addEventListener('DOMContentLoaded', restore_options);

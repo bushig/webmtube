@@ -4,10 +4,10 @@ import {MAX_SIZE, DEFAULT_SETTINGS} from './config'
 global.browser = global.chrome;
 
 let settings = browser.storage.sync.get(
-        DEFAULT_SETTINGS, function (items) {
-            console.log(items);
-            settings = items;
-        });
+    DEFAULT_SETTINGS, function (items) {
+        console.log(items);
+        settings = items;
+    });
 
 // Function to get absolute url from relative
 function qualifyURL(url) {
@@ -66,7 +66,7 @@ function increaseViewsListener(event) {
                 browser.storage.sync.get({'views': 0}, function (data) {
                     let viewsCount = data['views'] + 1;
                     browser.storage.sync.set({'views': viewsCount}, function () {
-                        console.log('Удачный просмотр: ', obj);
+                        console.log('Удачный просмотр: ');
                         let webmData = window.webm_data[md5].data;
                         console.log(webmData);
                         parseData(Object.assign({}, webmData, {views: parseInt(webmData.views) + 1}), true);
@@ -158,12 +158,51 @@ function setLikesListener(node, md5, action_type) {
         fetch(request).then((resp)=> {
             return resp.json()
         }).then((data) => {
+            let action = data.action;
             let obj = {};
-            obj[md5] = null;
-            browser.storage.get(obj, function (storData) {
-                if (storData)
-                    parseData(data);
-            });
+            obj[md5] = {action: null};
+            // Данные из хранилища
+            browser.storage.local.get(obj, (storeData) => {
+                // Количество лайков из хранилища
+                browser.storage.sync.get({likes: 0, dislikes: 0}, (likesData)=> {
+                    let likes = likesData.likes;
+                    let dislikes = likesData.dislikes;
+                    console.log(storeData[md5].action, action);
+                    // Если одинаковый action
+                    if (storeData[md5].action === action) {
+                        // Nothing
+                        // Разный action и не равен null
+                    } else if (storeData[md5].action !== action && storeData[md5].action !== null && action !== null) {
+                        console.log('Зашли сюда!');
+                        if (storeData[md5].action === 'like') {
+                            likes--;
+                            dislikes++;
+                        } else if (storeData[md5].action === 'dislike') {
+                            likes++;
+                            dislikes--;
+                        }
+                        // Один из action равен null
+                    } else if (storeData[md5].action === null) {
+                        if (action == 'like') {
+                            likes++
+                        } else {
+                            dislikes++
+                        }
+                    } else if (action === null) {
+                        if (storeData[md5].action == 'like') {
+                            likes--
+                        } else {
+                            dislikes--
+                        }
+                    }
+                    browser.storage.sync.set({likes: likes, dislikes: dislikes}, ()=> {
+                        storeData[md5].action = action;
+                        browser.storage.local.set(storeData, ()=> {
+                            parseData(data, true);
+                        })
+                    })
+                });
+            })
         });
     })
 }
@@ -279,17 +318,23 @@ function parseData(data, onlyRender = false) {
     // Если стоит onlyRender не изменять данные в глобальном объекте
     let md5 = data.md5;
     let viewed = false; // Была ли уже просмотрена ШЕБМ
+    let action = null;
     browser.storage.local.get(md5, function (info) {
-        if (info[md5] && info[md5].viewed === true) {
-            viewed = true;
+        if (info[md5]) {
+            if (info[md5].viewed === true) {
+                viewed = true;
+            }
+            if (info[md5].action) {
+                action = info[md5].action;
+            }
         }
         if (onlyRender === false) {
             // Значит есть информация о лайках - Обновить только ее
-            if (data.action || data.action === null) {
-                window.webm_data[md5].data = Object.assign(window.webm_data[md5].data, data);
-            } else {
-                window.webm_data[md5].data = data;
-            }
+            // if (data.action || data.action === null) {
+            //     window.webm_data[md5].data = Object.assign({}, window.webm_data[md5].data, data);
+            // } else {
+            window.webm_data[md5].data = data;
+            // }
         }
         let nodes = window.webm_data[md5].elems;
         nodes.forEach((node)=> {
@@ -309,11 +354,13 @@ function parseData(data, onlyRender = false) {
                     views: data.views,
                     likes: data.likes,
                     dislikes: data.dislikes,
-                    action: data.action,
+                    action: action,
                     message: null,
                     viewed: viewed
                 });
-                setViewListener(node, md5);
+                if (viewed === false) {
+                    setViewListener(node, md5); // Потом сделать постоянное навешивание, но на сервере увеличивать счетчик не чаще раза в 10 минут
+                }
             }
         })
     });
