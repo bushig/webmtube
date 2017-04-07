@@ -3,7 +3,7 @@ import {MAX_SIZE, DEFAULT_SETTINGS} from './config'
 // Полифил чтобы работал Firefox
 global.browser = global.chrome;
 
-let settings = browser.storage.sync.get(
+let settings = browser.storage.local.get(
     DEFAULT_SETTINGS, function (items) {
         console.log(items);
         settings = items;
@@ -63,9 +63,9 @@ function increaseViewsListener(event) {
             req[md5] = obj;
             browser.storage.local.set(req, function () {
                 // Счетчик просмотров увеличиваем даже если до этого были просмотры.
-                browser.storage.sync.get({'views': 0}, function (data) {
+                browser.storage.local.get({'views': 0}, function (data) {
                     let viewsCount = data['views'] + 1;
-                    browser.storage.sync.set({'views': viewsCount}, function () {
+                    browser.storage.local.set({'views': viewsCount}, function () {
                         console.log('Удачный просмотр: ');
                         let webmData = window.webm_data[md5].data;
                         console.log(webmData);
@@ -164,7 +164,7 @@ function setLikesListener(node, md5, action_type) {
             // Данные из хранилища
             browser.storage.local.get(obj, (storeData) => {
                 // Количество лайков из хранилища
-                browser.storage.sync.get({likes: 0, dislikes: 0}, (likesData)=> {
+                browser.storage.local.get({likes: 0, dislikes: 0}, (likesData)=> {
                     let likes = likesData.likes;
                     let dislikes = likesData.dislikes;
                     console.log(storeData[md5].action, action);
@@ -195,7 +195,7 @@ function setLikesListener(node, md5, action_type) {
                             dislikes--
                         }
                     }
-                    browser.storage.sync.set({likes: likes, dislikes: dislikes}, ()=> {
+                    browser.storage.local.set({likes: likes, dislikes: dislikes}, ()=> {
                         storeData[md5].action = action;
                         browser.storage.local.set(storeData, ()=> {
                             parseData(data, true);

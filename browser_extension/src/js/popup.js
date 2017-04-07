@@ -5,7 +5,7 @@ global.browser = global.chrome;
 
 // Saves options to chrome.storage
 function load_stats() {
-    chrome.storage.sync.get({
+    chrome.storage.local.get({
         views: 0,
         likes: 0,
         dislikes: 0
