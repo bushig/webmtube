@@ -51,21 +51,22 @@ function increaseViewsListener(event) {
     } else {
         // Проверяем просмотрен ли ролик
         browser.storage.local.get(md5, function (info) {
-            let obj = info[md5];
-            // Еще нет данных или еще не просмотрен
-            if (obj === undefined) {
-                obj = {};
-                obj.viewed = true;
-            } else if (obj.viewed !== true) {
-                Object.assign(obj, {viewed: true});
-            }
-            let req = {};
-            req[md5] = obj;
-            browser.storage.local.set(req, function () {
-                // Счетчик просмотров увеличиваем даже если до этого были просмотры.
-                browser.storage.local.get({'views': 0}, function (data) {
-                    let viewsCount = data['views'] + 1;
-                    browser.storage.local.set({'views': viewsCount}, function () {
+            browser.storage.local.get({'views': 0, 'uniqueViews': 0}, function (data) {
+                let viewsCount = data['views'] + 1;// Увеличиваем даже если до этого были просмотры.
+                let uniqueViewsCount = data['uniqueViews']; // Уникальные просмотры
+                let obj = info[md5];
+                // Еще нет данных или еще не просмотрен
+                if (obj === undefined) {
+                    uniqueViewsCount++;
+                    obj = {};
+                    obj.viewed = true;
+                } else if (obj.viewed !== true) {
+                    Object.assign(obj, {viewed: true});
+                }
+                let req = {};
+                req[md5] = obj;
+                browser.storage.local.set(req, function () {
+                    browser.storage.local.set({'views': viewsCount, 'uniqueViews': uniqueViewsCount}, function () {
                         console.log('Удачный просмотр: ');
                         let webmData = window.webm_data[md5].data;
                         console.log(webmData);
