@@ -69,7 +69,10 @@ function increaseViewsListener(event) {
                         console.log('Удачный просмотр: ');
                         let webmData = window.webm_data[md5].data;
                         console.log(webmData);
-                        parseData(Object.assign({}, webmData, {views: parseInt(webmData.views) + 1}), true);
+                        parseData(Object.assign(window.webm_data[md5].data, {
+                            views: parseInt(webmData.views) + 1,
+                            currViewed: true
+                        }), true);
                     })
                 })
             });
@@ -318,6 +321,7 @@ function parseData(data, onlyRender = false) {
     // Если стоит onlyRender не изменять данные в глобальном объекте
     let md5 = data.md5;
     let viewed = false; // Была ли уже просмотрена ШЕБМ
+    let currViewed = false; // ШЕБМ была просмотрена в текущем треде (при обновлении страницы сбрасывается)
     let action = null;
     browser.storage.local.get(md5, function (info) {
         if (info[md5]) {
@@ -326,6 +330,9 @@ function parseData(data, onlyRender = false) {
             }
             if (info[md5].action) {
                 action = info[md5].action;
+            }
+            if (data.currViewed) {
+                currViewed = true;
             }
         }
         if (onlyRender === false) {
@@ -358,7 +365,7 @@ function parseData(data, onlyRender = false) {
                     message: null,
                     viewed: viewed
                 });
-                if (viewed === false) {
+                if (currViewed === false) {
                     setViewListener(node, md5); // Потом сделать постоянное навешивание, но на сервере увеличивать счетчик не чаще раза в 10 минут
                 }
             }
