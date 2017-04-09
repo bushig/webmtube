@@ -2,7 +2,6 @@
 import atexit
 import os
 import logging
-from logging.handlers import TimedRotatingFileHandler
 
 import falcon
 from falcon_cors import CORS
@@ -11,7 +10,6 @@ from views import ScreamerResource, ViewWEBMResource, LikeResource, DislikeResou
 from models import Base, engine
 from middleware import RequireJSON, JSONTranslator
 from config import LOGGING_CELERY_FILE, LOGGING_FALCON_FILE, LOGGING_PATH, LOG_LEVEL
-from utils import before_shutdown_handler
 
 # Init DB
 Base.metadata.create_all(engine)
@@ -56,4 +54,4 @@ app.add_route('/check/{md5}/view', view_webm_resource)
 app.add_route('/check/{md5}/like', like_resource)
 app.add_route('/check/{md5}/dislike', dislike_resource)
 
-atexit.register(before_shutdown_handler)
+# atexit.register(before_shutdown_handler)

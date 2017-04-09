@@ -32,13 +32,18 @@ def pop_webm_from_redis_list():
 
 
 def save_webm_to_db(md5):
-    data = r.hgetall('webm:' + md5)
-    session = Session()
-    webm = session.query(WEBM).get(md5)
-    webm.views = data['views']
-    webm.likes = data['likes']
-    webm.dislikes = data['dislikes']
-    session.commit()  # TODO: maybe should be one bulk operation to save all webms
+    r_type = r.type('webm:' + md5)
+
+    if r_type == 'hash':
+        data = r.hgetall('webm:' + md5)
+        session = Session()
+        webm = session.query(WEBM).get(md5)
+        webm.views = data['views']
+        webm.likes = data['likes']
+        webm.dislikes = data['dislikes']
+        session.commit()  # TODO: maybe should be one bulk operation to save all webms
+    else:
+        print('Not hash')
     del_cache(md5)
 
 

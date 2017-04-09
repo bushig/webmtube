@@ -27,7 +27,7 @@ def before_shutdown_handler():
             break
         save_webm_to_db(md5)
         counter += 1
-        print("Saved webm to DB: ", md5)
+        print("Saved webm #{} to DB: {}".format(counter, md5))
     print("Saved ", counter, "in total")
 
 
