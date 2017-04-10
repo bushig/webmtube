@@ -163,6 +163,7 @@ function setLikesListener(node, md5, action_type) {
         fetch(request).then((resp)=> {
             return resp.json()
         }).then((data) => {
+            Object.assign(window.webm_data[md5].data, data); //DANGER!
             let action = data.action;
             let obj = {};
             obj[md5] = {action: null};
@@ -178,7 +179,6 @@ function setLikesListener(node, md5, action_type) {
                         // Nothing
                         // Разный action и не равен null
                     } else if (storeData[md5].action !== action && storeData[md5].action !== null && action !== null) {
-                        console.log('Зашли сюда!');
                         if (storeData[md5].action === 'like') {
                             likes--;
                             dislikes++;
@@ -204,7 +204,7 @@ function setLikesListener(node, md5, action_type) {
                         storeData[md5].action = action;
                         browser.storage.local.set(storeData, ()=> {
                             // TODO: Тут нужно сделать сохранение новой информации в window.webm_data и использовать ее при парсе
-                            parseData(data, true);
+                            parseData(window.webm_data[md5].data, true);
                         })
                     })
                 });
