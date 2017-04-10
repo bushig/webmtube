@@ -70,10 +70,11 @@ function increaseViewsListener(event) {
                         console.log('Удачный просмотр: ');
                         let webmData = window.webm_data[md5].data;
                         console.log(webmData);
-                        parseData(Object.assign(window.webm_data[md5].data, {
+                        Object.assign(window.webm_data[md5].data, {
                             views: parseInt(webmData.views) + 1,
                             currViewed: true
-                        }), true);
+                        });
+                        parseData(window.webm_data[md5].data, true);
                     })
                 })
             });
@@ -202,6 +203,7 @@ function setLikesListener(node, md5, action_type) {
                     browser.storage.local.set({likes: likes, dislikes: dislikes}, ()=> {
                         storeData[md5].action = action;
                         browser.storage.local.set(storeData, ()=> {
+                            // TODO: Тут нужно сделать сохранение новой информации в window.webm_data и использовать ее при парсе
                             parseData(data, true);
                         })
                     })
