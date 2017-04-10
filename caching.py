@@ -27,6 +27,13 @@ def del_cache(md5):
     r.delete('webm:' + md5)
 
 
+def del_all_cache():
+    """Delete all cache in WEBM: namespace"""
+    for key in r.scan_iter("webm:*"):
+        print('deleted: {}'.format(key))
+        r.delete(key)
+
+
 def pop_webm_from_redis_list():
     return r.lpop('webmlist')
 

@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 import hashlib
 
 from config import WEBM_PATH, DVACH_DOMAINS, ALLOWED_BOARDS, MAX_SIZE
-from caching import pop_webm_from_redis_list, save_webm_to_db
+from caching import pop_webm_from_redis_list, save_webm_to_db, del_all_cache
 
 
 def is_valid_2ch_url(url):

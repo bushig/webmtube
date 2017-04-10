@@ -1,5 +1,7 @@
 import sys
+
 from utils import before_shutdown_handler
+from caching import del_all_cache
 
 
 def main():
@@ -8,7 +10,7 @@ def main():
         if arg == '-save':
             before_shutdown_handler()
         elif arg == '-flush':
-            print('Not yet here')
+            del_all_cache()
         else:
             print('Invalid  command')
     else:
