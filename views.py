@@ -7,7 +7,7 @@ import redis
 from models import Session, WEBM
 from utils import is_valid_2ch_url
 from tasks import analyse_video
-from caching import set_cache_delayed, get_cache, set_cache, incr_views, like_webm
+from caching import set_cache_delayed, get_cache, set_cache, incr_views, like_webm, check_ip_viewed
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1)
 falcon_log = logging.getLogger('falcon')
@@ -24,11 +24,12 @@ class ScreamerResource:
     # TODO: If in DB return result, if not in DB, return message that added to analyze, if wrong url throw error
 
     def on_get(self, request, response):
-        falcon_log.info('Received GET request with params {}, trying to acquire data from Redis'.format(request.get_param_as_list('url')))
+        falcon_log.info('Received GET request with params {}, trying to acquire data from Redis'.format(
+            request.get_param_as_list('url')))
         # print(request.get_param_as_list('url'))
         md5 = request.get_param('md5')
         url = request.get_param('url')
-        response.set_header("Access-Control-Allow-Origin", "*")        
+        response.set_header("Access-Control-Allow-Origin", "*")
         # print("Data from redis: ", webm_redis_info)
         webm_redis_info = get_cache(md5)  # info from redis
         falcon_log.info('Data from redis: {}'.format(webm_redis_info))
@@ -54,7 +55,7 @@ class ScreamerResource:
                 analyse_video.delay(md5, url)
                 falcon_log.info('Adding WEBM to task queue with url of {}'.format(url))
                 set_cache_delayed(md5)
-                #print('Added task')
+                # print('Added task')
                 response.status = status_codes.HTTP_202
                 request.context['result'] = {"md5": md5, "message": "Добавлено в очередь на анализ"}
             else:
@@ -62,7 +63,6 @@ class ScreamerResource:
                 response.status = status_codes.HTTP_400
                 request.context['result'] = {"md5": md5,
                                              "message": "Неправильный запрос"}
-
 
     def on_post(self, request, response):
         falcon_log.info('Received POST request with params {}, trying to acquire data from Redis'.format(
@@ -95,7 +95,7 @@ class ScreamerResource:
                         analyse_video.delay(md5, url)
                         falcon_log.info('Adding WEBM to task queue with url of {}'.format(url))
                         set_cache_delayed(md5)
-                        #print('Added task')
+                        # print('Added task')
                         webm_response = {"md5": md5, "message": "Добавлено в очередь на анализ"}
                     else:
                         webm_response = {"md5": md5, "message": "Неправильный url"}
@@ -111,22 +111,20 @@ class ScreamerResource:
 
 
 class ViewWEBMResource:
-    # TODO: Убрать в следущей версии
-    def on_get(self, request, response, md5):
-        succeed = incr_views(md5)
-        if succeed:
-            response.status = status_codes.HTTP_200
-        else:
-            response.status = status_codes.HTTP_409
-            request.context['result'] = {"message": "Ошибка"}  # TODO: make NO WEBM IN REDIS error
-
     def on_post(self, request, response, md5):
-        succeed = incr_views(md5)
-        if succeed:
-            response.status = status_codes.HTTP_200
+        ip = request.access_route[-1]
+        viewed = check_ip_viewed(md5, ip)
+        if type(viewed) == int:
+            print('Until views reset: ', viewed)
+            response.status = status_codes.HTTP_304
+            request.context['result'] = {"ttl": viewed}  # in seconds
         else:
-            response.status = status_codes.HTTP_409
-            request.context['result'] = {"message": "Ошибка"}  # TODO: make NO WEBM IN REDIS error
+            succeed = incr_views(ip, md5)
+            if succeed:
+                response.status = status_codes.HTTP_200
+            else:
+                response.status = status_codes.HTTP_409
+                request.context['result'] = {"message": "Ошибка"}  # TODO: make NO WEBM IN REDIS error
 
 
 class LikeResource:

@@ -71,7 +71,7 @@ def get_cache(md5):
         return
 
 
-def incr_views(md5):
+def incr_views(ip, md5):
     """
     :return: True if increased, False if failed
     """
@@ -79,8 +79,21 @@ def incr_views(md5):
     print(md5, r_type)  # TODO: Если нет в кэше, загрузить и увеличить счетчик.
     if r_type == 'hash':
         r.hincrby('webm:' + md5, 'views')
+        r.setex("views:{}:{}".format(ip, md5), 600, 'v')
         return True
     return False
+
+
+def check_ip_viewed(md5, ip):
+    """
+    return TTL of key if viewed and return False is expired or didnt viewed
+    """
+    ttl = r.ttl("views:{}:{}".format(ip, md5))
+    if ttl == -2:  # expired
+        return False
+    else:
+        return ttl
+
 
 def like_webm(md5, ip, action):
     # Если все прошло удачно - вернуть словарь с количеством лайков/дизлайков, иначе вернуть None
