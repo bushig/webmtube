@@ -265,6 +265,7 @@ function setViewListener(node, md5) {
         console.log(node);
     }
     var img = node.querySelector('img.preview');
+    // console.log(img);
     img.removeEventListener('click', increaseViewsListener);
     img.md5 = md5;
     img.addEventListener('click', increaseViewsListener);
