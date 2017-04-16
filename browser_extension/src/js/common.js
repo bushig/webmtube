@@ -45,42 +45,41 @@ function OneWEBMListener(event) {
 }
 function increaseViewsListener(event) {
     event.target.removeEventListener('click', increaseViewsListener);
-    const md5 = event.target.md5;
+    const md5 = event.currentTarget.md5;
     if (md5 === undefined) {
+        conslole.log('Не удалось повесить счетчик просмотров на: ', event.target);
         console.log(md5, event.target);
-    } else {
-        // Проверяем просмотрен ли ролик
-        browser.storage.local.get(md5, function (info) {
-            browser.storage.local.get({'views': 0, 'uniqueViews': 0}, function (data) {
-                let viewsCount = data['views'] + 1;// Увеличиваем даже если до этого были просмотры.
-                let uniqueViewsCount = data['uniqueViews']; // Уникальные просмотры
-                let obj = info[md5];
-                // Еще нет данных или еще не просмотрен
-                if (obj === undefined) {
-                    uniqueViewsCount++;
-                    obj = {};
-                    obj.viewed = true;
-                } else if (obj.viewed !== true) {
-                    Object.assign(obj, {viewed: true});
-                }
-                let req = {};
-                req[md5] = obj;
-                browser.storage.local.set(req, function () {
-                    browser.storage.local.set({'views': viewsCount, 'uniqueViews': uniqueViewsCount}, function () {
-                        console.log('Удачный просмотр: ');
-                        let webmData = window.webm_data[md5].data;
-                        console.log(webmData);
-                        Object.assign(window.webm_data[md5].data, {
-                            views: parseInt(webmData.views) + 1,
-                            currViewed: true
-                        });
-                        parseData(window.webm_data[md5].data, true);
-                    })
-                })
-            });
-        })
     }
-
+    // Проверяем просмотрен ли ролик
+    browser.storage.local.get(md5, function (info) {
+        browser.storage.local.get({'views': 0, 'uniqueViews': 0}, function (data) {
+            let viewsCount = data['views'] + 1;// Увеличиваем даже если до этого были просмотры.
+            let uniqueViewsCount = data['uniqueViews']; // Уникальные просмотры
+            let obj = info[md5];
+            // Еще нет данных или еще не просмотрен
+            if (obj === undefined) {
+                uniqueViewsCount++;
+                obj = {};
+                obj.viewed = true;
+            } else if (obj.viewed !== true) {
+                Object.assign(obj, {viewed: true});
+            }
+            let req = {};
+            req[md5] = obj;
+            browser.storage.local.set(req, function () {
+                browser.storage.local.set({'views': viewsCount, 'uniqueViews': uniqueViewsCount}, function () {
+                    console.log('Удачный просмотр: ');
+                    let webmData = window.webm_data[md5].data;
+                    console.log(webmData);
+                    Object.assign(window.webm_data[md5].data, {
+                        views: parseInt(webmData.views) + 1,
+                        currViewed: true
+                    });
+                    parseData(window.webm_data[md5].data, true);
+                })
+            })
+        });
+    });
     let requestHeader = new Headers();
     requestHeader.append('Content-Type', 'application/json');
     requestHeader.append('Accept', 'application/json');
@@ -261,9 +260,6 @@ function setMessage(panel, text) {
 
 // Отвечает за увеличение счетчика просмотров
 function setViewListener(node, md5) {
-    if (!md5) {
-        console.log(node);
-    }
     var img = node.querySelector('img.preview');
     // console.log(img);
     img.removeEventListener('click', increaseViewsListener);
