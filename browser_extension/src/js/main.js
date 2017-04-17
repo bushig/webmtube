@@ -1,6 +1,7 @@
 import threadHandler from './thread'
 import threadListHandler from './threadList'
 import {BOARDS} from "./config"
+import runAPI from  './dollchan'
 
 // Полифил чтобы работал Firefox
 global.browser = global.chrome;
@@ -12,6 +13,11 @@ const currBoard = pathArray[1];
 // Если мы не на главной странице и доска поддерживается, то включаем скрипт
 console.log(currBoard);
 console.log(pathArray.length);
+if (document.querySelector('div#de-main')) {
+    console.log('Есть кукла!');
+    setTimeout(runAPI, 0);
+    window.isDollchanEnabled = true;
+}
 if (currBoard && BOARDS.indexOf(currBoard) !== -1) {
     //Если в списке тредов
     if (pathArray.length == 3) {

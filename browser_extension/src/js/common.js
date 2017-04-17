@@ -43,13 +43,8 @@ function OneWEBMListener(event) {
     checkTime();
 
 }
-function increaseViewsListener(event) {
-    event.target.removeEventListener('click', increaseViewsListener);
-    const md5 = event.currentTarget.md5;
-    if (md5 === undefined) {
-        conslole.log('Не удалось повесить счетчик просмотров на: ', event.target);
-        console.log(md5, event.target);
-    }
+
+function increaseViews(md5) {
     // Проверяем просмотрен ли ролик
     browser.storage.local.get(md5, function (info) {
         browser.storage.local.get({'views': 0, 'uniqueViews': 0}, function (data) {
@@ -90,6 +85,15 @@ function increaseViewsListener(event) {
         mode: 'cors'
     });
     fetch(request);
+}
+function increaseViewsListener(event) {
+    event.target.removeEventListener('click', increaseViewsListener);
+    const md5 = event.currentTarget.md5;
+    if (md5 === undefined) {
+        conslole.log('Не удалось повесить счетчик просмотров на: ', event.target);
+        console.log(md5, event.target);
+    }
+    increaseViews(md5)
 }
 
 // Создаем панель если ее нет и в ней размещаем всю информацию
@@ -264,7 +268,7 @@ function setViewListener(node, md5) {
     // console.log(img);
     img.removeEventListener('click', increaseViewsListener);
     img.md5 = md5;
-    img.addEventListener('click', increaseViewsListener);
+    img.addEventListener('click', increaseViewsListener, false);
 }
 
 // Красит элемент в нужный цвет в зависимости от шанса скримера
@@ -437,4 +441,4 @@ function getAllWEBMData(nodes) {
     })
 }
 
-module.exports = {getOneWEBMData, getAllWEBMData};
+module.exports = {getOneWEBMData, getAllWEBMData, increaseViews};
