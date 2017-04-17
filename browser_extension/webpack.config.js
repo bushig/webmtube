@@ -52,7 +52,8 @@ module.exports = {
         new CopyWebpackPlugin([
             //icons
             {from: 'src/icons', to: 'icons'},
-            {from: 'src/css', to: 'css'}
+            {from: 'src/css', to: 'css'},
+            {from: 'node_modules/webextension-polyfill/dist/browser-polyfill.js', to: 'browser-polyfill.js'} // Redo to copy from npm
         ])
     ]
 };

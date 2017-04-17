@@ -1,14 +1,14 @@
 import {DEFAULT_SETTINGS} from './config'
 
 // Полифил чтобы работал Firefox
-global.browser = global.chrome;
+// global.browser = global.chrome;
 
 // Saves options to chrome.storage
 function save_options() {
     let highlight = document.getElementById('highlight').checked;
     browser.storage.local.set({
         alwaysHighlight: highlight
-    }, function () {
+    }).then(() => {
         // Update status to let user know options were saved.
         var status = document.getElementById('status');
         status.textContent = 'Настройки сохранены.';
@@ -22,15 +22,14 @@ function save_options() {
 // stored in chrome.storage.
 function restore_options() {
     // Use default value color = 'red' and likesColor = true.
-    browser.storage.local.get(DEFAULT_SETTINGS,
-        function (items) {
+    browser.storage.local.get(DEFAULT_SETTINGS).then((items) => {
             console.log(items);
             document.getElementById('highlight').checked = items.alwaysHighlight;
         });
 }
 
 function reset_stats() {
-    browser.storage.local.clear(function () {
+    browser.storage.local.clear().then(() => {
         var status = document.getElementById('status');
         status.textContent = 'Статистика сброшена.';
         setTimeout(function () {

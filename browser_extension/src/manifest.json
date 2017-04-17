@@ -20,6 +20,7 @@
         "*://2ch.pm/*"
       ],
       "js": [
+        "browser-polyfill.js",
         "main.bundle.js"
       ],
       "css": [

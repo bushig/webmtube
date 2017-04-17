@@ -1,13 +1,12 @@
 import {MAX_SIZE, DEFAULT_SETTINGS} from './config'
 
 // Полифил чтобы работал Firefox
-global.browser = global.chrome;
+// global.browser = global.chrome;
 
-let settings = browser.storage.local.get(
-    DEFAULT_SETTINGS, function (items) {
-        console.log(items);
-        settings = items;
-    });
+let settings = browser.storage.local.get(DEFAULT_SETTINGS).then((items) => {
+    console.log(items);
+    settings = items;
+});
 
 // Function to get absolute url from relative
 function qualifyURL(url) {
@@ -45,36 +44,41 @@ function OneWEBMListener(event) {
 }
 
 function increaseViews(md5) {
+    // Наъуй мозиллу и промисы
     // Проверяем просмотрен ли ролик
-    browser.storage.local.get(md5, function (info) {
-        browser.storage.local.get({'views': 0, 'uniqueViews': 0}, function (data) {
-            let viewsCount = data['views'] + 1;// Увеличиваем даже если до этого были просмотры.
-            let uniqueViewsCount = data['uniqueViews']; // Уникальные просмотры
-            let obj = info[md5];
-            // Еще нет данных или еще не просмотрен
-            if (obj === undefined) {
-                uniqueViewsCount++;
-                obj = {};
-                obj.viewed = true;
-            } else if (obj.viewed !== true) {
-                Object.assign(obj, {viewed: true});
-            }
-            let req = {};
-            req[md5] = obj;
-            browser.storage.local.set(req, function () {
-                browser.storage.local.set({'views': viewsCount, 'uniqueViews': uniqueViewsCount}, function () {
-                    console.log('Удачный просмотр: ');
-                    let webmData = window.webm_data[md5].data;
-                    console.log(webmData);
-                    Object.assign(window.webm_data[md5].data, {
-                        views: parseInt(webmData.views) + 1,
-                        currViewed: true
-                    });
-                    parseData(window.webm_data[md5].data, true);
-                })
-            })
+    let infoPromise = browser.storage.local.get(md5);
+
+    let dataPromise = browser.storage.local.get({'views': 0, 'uniqueViews': 0});
+    Promise.all([infoPromise, dataPromise]).then((values) => {
+        let info = values[0];
+        let data = values[1];
+        let viewsCount = data['views'] + 1;// Увеличиваем даже если до этого были просмотры.
+        let uniqueViewsCount = data['uniqueViews']; // Уникальные просмотры
+        let obj = info[md5];
+        // Еще нет данных или еще не просмотрен
+        if (obj === undefined) {
+            uniqueViewsCount++;
+            obj = {};
+            obj.viewed = true;
+        } else if (obj.viewed !== true) {
+            Object.assign(obj, {viewed: true});
+        }
+        let req = {};
+        req[md5] = obj;
+        browser.storage.local.set(req);
+        browser.storage.local.set({'views': viewsCount, 'uniqueViews': uniqueViewsCount});
+        return md5;
+    }).then((md5) => {
+        console.log('Удачный просмотр: ');
+        let webmData = window.webm_data[md5].data;
+        console.log(webmData);
+        Object.assign(window.webm_data[md5].data, {
+            views: parseInt(webmData.views) + 1,
+            currViewed: true
         });
+        parseData(window.webm_data[md5].data, true);
     });
+
     let requestHeader = new Headers();
     requestHeader.append('Content-Type', 'application/json');
     requestHeader.append('Accept', 'application/json');
@@ -154,6 +158,7 @@ function setLikesPanel(panel, md5 = null, likes, dislikes, action = null) {
 // Отвечает за отправку запроса на сервер(лайки и дизлайки) и установку новых иконок и счетчика лайков
 // TODO: Проверить убираются ли EventListeners сборщиком мусора при замене иконок
 function setLikesListener(node, md5, action_type) {
+    // Мозилла пiдоры
     node.addEventListener('click', function (event) {
         let requestHeader = new Headers();
         requestHeader.append('Content-Type', 'application/json');
@@ -171,48 +176,54 @@ function setLikesListener(node, md5, action_type) {
             let obj = {};
             obj[md5] = {action: null};
             // Данные из хранилища
-            browser.storage.local.get(obj, (storeData) => {
-                // Количество лайков из хранилища
-                browser.storage.local.get({likes: 0, dislikes: 0}, (likesData)=> {
-                    let likes = likesData.likes;
-                    let dislikes = likesData.dislikes;
-                    console.log(storeData[md5].action, action);
-                    // Если одинаковый action
-                    if (storeData[md5].action === action) {
-                        // Nothing
-                        // Разный action и не равен null
-                    } else if (storeData[md5].action !== action && storeData[md5].action !== null && action !== null) {
-                        if (storeData[md5].action === 'like') {
-                            likes--;
-                            dislikes++;
-                        } else if (storeData[md5].action === 'dislike') {
-                            likes++;
-                            dislikes--;
-                        }
-                        // Один из action равен null
-                    } else if (storeData[md5].action === null) {
-                        if (action == 'like') {
-                            likes++
-                        } else {
-                            dislikes++
-                        }
-                    } else if (action === null) {
-                        if (storeData[md5].action == 'like') {
-                            likes--
-                        } else {
-                            dislikes--
-                        }
+            let storeDataPromise = browser.storage.local.get(obj);
+            // Количество лайков из хранилища
+            let likesDataPromise = browser.storage.local.get({likes: 0, dislikes: 0});
+            Promise.all([storeDataPromise, likesDataPromise]).then((values) => {
+                let storeData = values[0];
+                let likesData = values[1];
+                let likes = likesData.likes;
+                let dislikes = likesData.dislikes;
+                console.log(storeData[md5].action, action);
+                // Если одинаковый action
+                if (storeData[md5].action === action) {
+                    // Nothing
+                    // Разный action и не равен null
+                } else if (storeData[md5].action !== action && storeData[md5].action !== null && action !== null) {
+                    if (storeData[md5].action === 'like') {
+                        likes--;
+                        dislikes++;
+                    } else if (storeData[md5].action === 'dislike') {
+                        likes++;
+                        dislikes--;
                     }
-                    browser.storage.local.set({likes: likes, dislikes: dislikes}, ()=> {
-                        storeData[md5].action = action;
-                        browser.storage.local.set(storeData, ()=> {
-                            // TODO: Тут нужно сделать сохранение новой информации в window.webm_data и использовать ее при парсе
-                            parseData(window.webm_data[md5].data, true);
-                        })
-                    })
-                });
+                    // Один из action равен null
+                } else if (storeData[md5].action === null) {
+                    if (action == 'like') {
+                        likes++
+                    } else {
+                        dislikes++
+                    }
+                } else if (action === null) {
+                    if (storeData[md5].action == 'like') {
+                        likes--
+                    } else {
+                        dislikes--
+                    }
+                }
+                return {md5, likes, dislikes, action, storeData}
+            }).then((resultData)=> {
+                let {md5, likes, dislikes, action, storeData} = resultData;
+                browser.storage.local.set({likes: likes, dislikes: dislikes}).then(()=> {
+                    storeData[md5].action = action;
+                    browser.storage.local.set(storeData).then(()=> {
+                        // TODO: Тут нужно сделать сохранение новой информации в window.webm_data и использовать ее при парсе
+                        parseData(window.webm_data[md5].data, true);
+                    });
+                })
             })
-        });
+
+            })
     })
 }
 
@@ -327,7 +338,7 @@ function parseData(data, onlyRender = false) {
     let viewed = false; // Была ли уже просмотрена ШЕБМ
     let currViewed = false; // ШЕБМ была просмотрена в текущем треде (при обновлении страницы сбрасывается)
     let action = null;
-    browser.storage.local.get(md5, function (info) {
+    browser.storage.local.get(md5).then((info) => {
         if (info[md5]) {
             if (info[md5].viewed === true) {
                 viewed = true;

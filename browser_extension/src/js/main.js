@@ -4,7 +4,7 @@ import {BOARDS} from "./config"
 import runAPI from  './dollchan'
 
 // Полифил чтобы работал Firefox
-global.browser = global.chrome;
+// global.browser = global.chrome;
 
 //Смотрим находимся ли мы в треде или на главной странице борды
 const curr_url = window.location.pathname;
