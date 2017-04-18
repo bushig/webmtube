@@ -37,7 +37,7 @@ function runAPI() {
                         const aElem = document.querySelector(`a[href="${ src }"]`);
                         const md5 = aElem.getAttribute('id').split('-').pop(-1);
                         let currViewed = window.webm_data[md5].data.currViewed;
-                        console.log(md5);
+                        // console.log(md5);
                         if (currViewed !== true) {
                             // Увеличиваем счетчик только если не просмотрено в данной сессии
                             increaseViews(md5);
