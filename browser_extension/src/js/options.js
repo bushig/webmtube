@@ -6,13 +6,22 @@ import {DEFAULT_SETTINGS} from './config'
 // Saves options to chrome.storage
 function save_options() {
     let highlight = document.getElementById('highlight').checked;
+    let volumePanelDisplay;
+    let volumeRadios = document.getElementsByName('volumePanelDisplay');
+    for (let i = 0; i < volumeRadios.length; i++) {
+        if (volumeRadios[i].checked) {
+            volumePanelDisplay = volumeRadios[i].value;
+            break;
+        }
+    }
+
     browser.storage.local.set({
-        alwaysHighlight: highlight
+        alwaysHighlight: highlight, volumePanelDisplay: volumePanelDisplay
     }).then(() => {
         // Update status to let user know options were saved.
-        var status = document.getElementById('status');
+        let status = document.getElementById('status');
         status.textContent = 'Настройки сохранены.';
-        setTimeout(function () {
+        setTimeout(()=> {
             status.textContent = '';
         }, 750);
     });
@@ -23,16 +32,17 @@ function save_options() {
 function restore_options() {
     // Use default value color = 'red' and likesColor = true.
     browser.storage.local.get(DEFAULT_SETTINGS).then((items) => {
-            console.log(items);
-            document.getElementById('highlight').checked = items.alwaysHighlight;
-        });
+        // console.log(items);
+        document.getElementById('highlight').checked = items.alwaysHighlight;
+        document.querySelector("input[name='volumePanelDisplay'][value='" + items.volumePanelDisplay + "']").checked = true;
+    });
 }
 
 function reset_stats() {
     browser.storage.local.clear().then(() => {
-        var status = document.getElementById('status');
+        let status = document.getElementById('status');
         status.textContent = 'Статистика сброшена.';
-        setTimeout(function () {
+        setTimeout(() => {
             status.textContent = '';
         }, 750);
     });

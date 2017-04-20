@@ -101,7 +101,7 @@ function increaseViewsListener(event) {
 }
 
 // Создаем панель если ее нет и в ней размещаем всю информацию
-function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, message, viewed} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
+function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, message, viewed, date} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
     let panel = node.querySelector('figcaption > .webm-panel');
     if (panel === null) {
         panel = document.createElement('div');
@@ -110,7 +110,7 @@ function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, 
         figcaption.insertBefore(panel, figcaption.children[1]);
     }
     if (screamChance !== undefined) {
-        setScreamColor(node, panel, screamChance);
+        setScreamColor(node, panel, screamChance, date);
     }
     if (views !== undefined) {
         setViews(panel, views, viewed);
@@ -223,7 +223,7 @@ function setLikesListener(node, md5, action_type) {
                 })
             })
 
-            })
+        })
     })
 }
 
@@ -283,38 +283,58 @@ function setViewListener(node, md5) {
 }
 
 // Красит элемент в нужный цвет в зависимости от шанса скримера
-function setScreamColor(node, panel, screamChance) {
-    var scream = panel.querySelector('span.scream');
+function setScreamColor(node, panel, screamChance, date) {
+    var scream = panel.querySelector('span.scream.tooltip');
     if (scream === null) {
         scream = document.createElement('span');
-        scream.className = 'scream';
+        scream.className = 'scream tooltip';
+        let dateTooltip = document.createElement('span');
+        dateTooltip.className = 'tooltiptext';
+        dateTooltip.innerText = date;
+        scream.appendChild(dateTooltip);
         panel.appendChild(scream);
     }
     const img = node.querySelector('.webm-file');
     let clsHighlight = " ";
+    // настройки панельки
+    let volumePanelType = settings.volumePanelDisplay;
+    let iconDisplay;
+    let iconColor;
+    if (volumePanelType === 'none' || volumePanelType === 'color') {
+        iconDisplay = "radio-unchecked";
+    }
+    if (volumePanelType === 'none' || volumePanelType === 'icons') {
+        iconColor = 'none';
+    }
     if (settings.alwaysHighlight) {
         clsHighlight = "-const ";
     }
-    if (screamChance == null) {
-        img.className += ' blue-shadow' + clsHighlight;
-        scream.style.background = '#3DBFFF';
-        createIcon(scream, 'volume-mute');
-    } else if (screamChance == 0) {
-        img.className += ' green-shadow' + clsHighlight;
-        scream.style.background = '#45D754';
-        createIcon(scream, 'volume-low');
-    } else if (screamChance == 0.5) {
-        img.className += ' yellow-shadow' + clsHighlight;
-        scream.style.background = 'yellow';
-        createIcon(scream, 'volume-medium');
-    } else if (screamChance == 0.8) {
-        img.className += ' orange-shadow' + clsHighlight;
-        scream.style.background = 'orange';
-        createIcon(scream, 'volume-high');
-    } else if (screamChance == 1.0) {
-        img.className += ' red-shadow' + clsHighlight;
-        scream.style.background = 'red';
-        createIcon(scream, 'volume-scream');
+    switch (screamChance) {
+        case null:
+            img.className += ' blue-shadow' + clsHighlight;
+            scream.style.background = iconColor || '#3DBFFF';
+            createIcon(scream, iconDisplay || 'volume-mute');
+            break;
+        case "0.0":
+            img.className += ' green-shadow' + clsHighlight;
+            scream.style.background = iconColor || '#45D754';
+            createIcon(scream, iconDisplay || 'volume-low');
+            break;
+        case "0.5":
+            img.className += ' yellow-shadow' + clsHighlight;
+            scream.style.background = iconColor || 'yellow';
+            createIcon(scream, iconDisplay || 'volume-medium');
+            break;
+        case "0.8":
+            img.className += ' orange-shadow' + clsHighlight;
+            scream.style.background = iconColor || 'orange';
+            createIcon(scream, iconDisplay || 'volume-high');
+            break;
+        case "1.0":
+            img.className += ' red-shadow' + clsHighlight;
+            scream.style.background = iconColor || 'red';
+            createIcon(scream, iconDisplay || 'volume-scream');
+            break;
     }
 }
 function createIcon(node, name, cls) {
@@ -378,7 +398,8 @@ function parseData(data, onlyRender = false) {
                     dislikes: data.dislikes,
                     action: action,
                     message: null,
-                    viewed: viewed
+                    viewed: viewed,
+                    date: data["time_created"]
                 });
                 if (currViewed === false) {
                     setViewListener(node, md5); // Потом сделать постоянное навешивание, но на сервере увеличивать счетчик не чаще раза в 10 минут
