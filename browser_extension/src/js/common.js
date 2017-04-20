@@ -1,5 +1,6 @@
 import {MAX_SIZE, DEFAULT_SETTINGS} from './config'
-
+let moment = require('moment');
+moment.locale('ru')
 // Полифил чтобы работал Firefox
 // global.browser = global.chrome;
 
@@ -290,7 +291,8 @@ function setScreamColor(node, panel, screamChance, date) {
         scream.className = 'scream tooltip';
         let dateTooltip = document.createElement('span');
         dateTooltip.className = 'tooltiptext';
-        dateTooltip.innerText = date;
+        dateTooltip.innerText = moment.utc(date).fromNow();
+        // console.log(moment(date));
         scream.appendChild(dateTooltip);
         panel.appendChild(scream);
     }
@@ -300,8 +302,10 @@ function setScreamColor(node, panel, screamChance, date) {
     let volumePanelType = settings.volumePanelDisplay;
     let iconDisplay;
     let iconColor;
-    if (volumePanelType === 'none' || volumePanelType === 'color') {
+    if (volumePanelType === 'color') {
         iconDisplay = "radio-unchecked";
+    } else if (volumePanelType === 'none') {
+        iconDisplay = 'clock';
     }
     if (volumePanelType === 'none' || volumePanelType === 'icons') {
         iconColor = 'none';
