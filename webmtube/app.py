@@ -1,15 +1,11 @@
 # _*_ coding:utf-8 _*_
-import atexit
-import os
-import logging
 
 import falcon
 from falcon_cors import CORS
 
-from views import ScreamerResource, ViewWEBMResource, LikeResource, DislikeResource
-from models import Base, engine
-from middleware import RequireJSON, JSONTranslator
-from config import LOGGING_CELERY_FILE, LOGGING_FALCON_FILE, LOGGING_PATH, LOG_LEVEL
+from webmtube.middleware import RequireJSON, JSONTranslator
+from webmtube.models import Base, engine
+from webmtube.views import ScreamerResource, ViewWEBMResource, LikeResource, DislikeResource
 
 # Init DB
 Base.metadata.create_all(engine)
@@ -53,5 +49,3 @@ app.add_route('/check', screamer_resource)
 app.add_route('/check/{md5}/view', view_webm_resource)
 app.add_route('/check/{md5}/like', like_resource)
 app.add_route('/check/{md5}/dislike', dislike_resource)
-
-# atexit.register(before_shutdown_handler)

@@ -1,18 +1,17 @@
-from urllib.request import urlopen, URLError
-from urllib.parse import urlparse
-from os import path
-from tempfile import NamedTemporaryFile
 import hashlib
+from tempfile import NamedTemporaryFile
+from urllib.parse import urlparse
+from urllib.request import urlopen, URLError
 
-from config import WEBM_PATH, DVACH_DOMAINS, ALLOWED_BOARDS, MAX_SIZE
-from caching import pop_webm_from_redis_list, save_webm_to_db, del_all_cache
+from webmtube.caching import pop_webm_from_redis_list, save_webm_to_db
+from webmtube.config import DVACH_DOMAINS, ALLOWED_BOARDS, MAX_SIZE
 
 
 def is_valid_2ch_url(url):
     url_info = urlparse(url)
     if url_info.netloc in DVACH_DOMAINS and url_info.scheme in ('http', 'https'):
         path_info = url_info.path.split('/')[1:]
-        if path_info[0] in ALLOWED_BOARDS and path_info[1] == 'src' and path_info[3][-5:] == '.webm':
+        if path_info[0] in ALLOWED_BOARDS and path_info[1] == 'webmtube' and path_info[3][-5:] == '.webm':
             return True
     return False
 

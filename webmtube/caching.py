@@ -1,5 +1,6 @@
 import redis
-from models import Session, WEBM
+
+from webmtube.models import Session, WEBM
 
 r = redis.StrictRedis(host='localhost', port=6379, db=1, decode_responses=True)
 

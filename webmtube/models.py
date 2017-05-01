@@ -1,11 +1,9 @@
-import datetime
-
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, CheckConstraint
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 
-from config import DB_ENGINE
+from webmtube.config import DB_ENGINE
 
 engine = create_engine(DB_ENGINE)
 

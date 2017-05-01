@@ -1,13 +1,12 @@
 import os
-import hashlib
 from tempfile import NamedTemporaryFile
 
-from hachoir.strip import BasicStripper
-from hachoir.parser import createParser
 from hachoir.editor import createEditor
-from hachoir.stream import FileOutputStream, OutputStream
+from hachoir.parser import createParser
+from hachoir.stream import OutputStream
+from hachoir.strip import BasicStripper
 
-from utils import get_file_md5
+from webmtube.utils import get_file_md5
 
 
 def TemporaryFileOutputStream():

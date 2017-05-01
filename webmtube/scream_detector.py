@@ -1,11 +1,8 @@
-from os import path
-from tempfile import TemporaryFile
-import subprocess
 import re
+import subprocess
+from tempfile import TemporaryFile
 
-from models import Session, WEBM
-from config import WEBM_PATH, LOUD, SCREAM, DEFENITLY_SCREAM
-from utils import download_file, get_file_md5
+from webmtube.config import LOUD, SCREAM, DEFENITLY_SCREAM
 
 
 # TODO: create celery worker that will: Download webm, analyze it(check md5 and sound) and delete

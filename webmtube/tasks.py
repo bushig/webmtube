@@ -1,11 +1,11 @@
 import celery
 from celery import Celery
-import logging
-from config import BROKER
-from models import WEBM, Session
-from utils import get_file_md5, download_file
-from scream_detector import get_scream_chance
-from caching import set_cache, del_cache
+
+from webmtube.caching import set_cache, del_cache
+from webmtube.config import BROKER
+from webmtube.models import WEBM, Session
+from webmtube.scream_detector import get_scream_chance
+from webmtube.utils import get_file_md5, download_file
 
 # Celery instance
 app = Celery('tasks', broker=BROKER)
