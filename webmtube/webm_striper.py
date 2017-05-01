@@ -57,9 +57,14 @@ def strip_webm(filename):
 
     output = stripEditor(editor)
     # print(output.filename)
-    with open(output.filename, 'rb') as output_file:
-        md5 = get_file_md5(output_file)
-        print(md5)
-    os.remove(output.filename)
+    return output.filename
 
-    # strip_webm("webm_files/3.webm")
+
+def hash_stripped_webm(filename):
+    md5 = ""
+    with open(filename, 'rb') as output_file:
+        md5 = get_file_md5(output_file)
+    os.remove(filename)
+    return md5
+
+# strip_webm("webm_files/3.webm")
