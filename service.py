@@ -1,6 +1,6 @@
 import sys
 
-from webmtube.caching import del_all_cache
+from webmtube.caching import del_all_dirty_cache
 from webmtube.utils import before_shutdown_handler
 
 
@@ -10,9 +10,9 @@ def main():
         if arg == '-save':
             before_shutdown_handler()
         elif arg == '-flush':
-            del_all_cache()
+            del_all_dirty_cache()
         elif arg == '-celerypurge':
-            from .tasks import app
+            from webmtube.tasks import app
             app.control.purge()
         else:
             print('Invalid  command')

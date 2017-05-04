@@ -49,7 +49,7 @@ def download_file(url):
     file_size = int(u.getheader("Content-Length"))
     if file_size > MAX_SIZE:
         raise Exception("WEBM size is too big. Allowed: {0}, File size: {1}".format(MAX_SIZE, file_size))
-    f = NamedTemporaryFile('w+b')
+    f = NamedTemporaryFile('w+b', suffix=".webm")
     print("Downloading: WEBM: {} Bytes: {}".format(url, file_size))
     file_size_dl = 0
     block_sz = 8192

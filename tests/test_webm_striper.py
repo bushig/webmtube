@@ -40,3 +40,19 @@ class TestWebm_striper:
         md5 = hash_stripped_webm(filename)
         assert os.path.isfile(filename) is False
         assert md5 == "c48cb49d94ebcea4afd685f4fcbf9c0a"
+
+    def test_strange_meta(self):
+        path_to_file = os.path.join(current_directory, 'webm_files/strange_meta.webm')
+        filename = strip_webm(path_to_file)
+        assert os.path.isfile(filename)
+        md5 = hash_stripped_webm(filename)
+        assert os.path.isfile(filename) is False
+        assert md5 == "527ad18aa45b0d22ae961cf2216c8ef6"
+
+    def test_not_webm_extension(self):
+        path_to_file = os.path.join(current_directory, 'webm_files/duplicates/1')
+        filename = strip_webm(path_to_file)
+        assert os.path.isfile(filename)
+        md5 = hash_stripped_webm(filename)
+        assert os.path.isfile(filename) is False
+        assert md5 == self.orig_md5

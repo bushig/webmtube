@@ -15,7 +15,8 @@ def TemporaryFileOutputStream():
 
     Filename have to be unicode, whereas (optional) real_filename can be str.
     """
-    temp_file = NamedTemporaryFile(delete=False)
+    temp_file = NamedTemporaryFile(delete=False, suffix=".webm")
+    print(temp_file.name)
     return OutputStream(temp_file, filename=temp_file.name)
 
 
