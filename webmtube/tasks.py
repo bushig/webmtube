@@ -36,9 +36,12 @@ def analyse_video(md5, url):# TODO: Rename to smth
         #print(screamer_chance)
         session = Session()
         print(strip_md5, screamer_chance)
-        webm = WEBM(id_=strip_md5, screamer_chance=screamer_chance)
-        dirty_webm = DirtyWEBM(md5=md5, webm=webm)
-        session.add(webm)
+        webm = session.query(WEBM).get(strip_md5)
+        # Was not in DB
+        if webm is None:
+            webm = WEBM(id_=strip_md5, screamer_chance=screamer_chance)
+            session.add(webm)
+        dirty_webm = DirtyWEBM(md5=md5, webm_id=strip_md5)
         session.add(dirty_webm)
         session.commit()
         del_dirty_cache(

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.sql import func
@@ -23,6 +23,8 @@ class WEBM(Base):
     likes = Column(Integer(), default=0)
     dislikes = Column(Integer(), default=0)
 
+    webms = relationship('DirtyWEBM', cascade='delete')
+
     # TODO: Define to_dictionary for JSON serialization
     def to_dict(self):
         return {'id': self.id, 'time_created': self.time_created.isoformat(),
@@ -45,5 +47,6 @@ class WEBM(Base):
 class DirtyWEBM(Base):
     __tablename__ = 'DirtyWEBM'
     md5 = Column(String(32), primary_key=True)
-    webm_id = Column(String(32), ForeignKey('WEBM.id'))
+    webm_id = Column(String(32), ForeignKey('WEBM.id', ), nullable=False)
     webm = relationship(WEBM)
+    ForeignKeyConstraint(['webm_id'], ['WEBM.id'])
