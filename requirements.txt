@@ -19,4 +19,5 @@ pytz==2016.10
 redis==2.10.5
 six==1.10.0
 SQLAlchemy==1.1.9
+SQLAlchemy-Utils==0.32.14
 vine==1.1.3
