@@ -3,10 +3,11 @@ from celery import Celery
 
 from webmtube.caching import set_cache, del_dirty_cache, set_dirty_cache
 from webmtube.config import BROKER
-from webmtube.models import WEBM, Session, DirtyWEBM
+from webmtube.models import WEBM, DirtyWEBM
 from webmtube.scream_detector import get_scream_chance
 from webmtube.utils import get_file_md5, download_file
 from webmtube.webm_striper import strip_webm, hash_stripped_webm
+from webmtube import Session
 
 # Celery instance
 app = Celery('tasks', broker=BROKER)

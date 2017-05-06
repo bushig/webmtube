@@ -1,5 +1,7 @@
-from webmtube.models import Session, WEBM, DirtyWEBM
+from webmtube.models import WEBM, DirtyWEBM
 from webmtube.config import CACHING_REDIS as r
+
+from webmtube import Session
 
 
 def set_cache(webm_data):
