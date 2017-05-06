@@ -3,6 +3,7 @@ from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 from urllib.request import urlopen, URLError
 
+from webmtube import Session
 from webmtube.caching import pop_webm_from_redis_list, save_webm_to_db
 from webmtube.config import DVACH_DOMAINS, ALLOWED_BOARDS, MAX_SIZE
 
@@ -18,15 +19,18 @@ def is_valid_2ch_url(url):
 
 def before_shutdown_handler():
     # TODO: save all data from redis to db and flush it
+    # Use bulk_update_mappings
     print('Shutting down')
     counter = 0
+    session = Session()
     while True:
-        md5 = pop_webm_from_redis_list()
+        md5 = pop_webm_from_redis_list()  # TODO: use sscans iteration of clean_md5
         if md5 is None:
             break
-        save_webm_to_db(md5)
+        save_webm_to_db(md5, session)
         counter += 1
         print("Saved webm #{} to DB: {}".format(counter, md5))
+    session.commit()
     print("Saved ", counter, "in total")
 
 

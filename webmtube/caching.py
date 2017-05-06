@@ -43,22 +43,28 @@ def del_all_dirty_cache():
         r.delete(key)
 
 
+def del_all_clean_cache():
+    """Delete all cache in CLEANWEBM: namespace"""
+    for key in r.scan_iter("cleanwebm:*"):
+        print('deleted clean: {}'.format(key))
+        r.delete(key)
+
 def pop_webm_from_redis_list():
     return r.lpop('webmlist')
 
 
-def save_webm_to_db(id_):
+def save_webm_to_db(id_, session):
+    """
+    Note that it does not commit to session
+    """
     r_type = r.type('cleanwebm:' + id_)
 
     if r_type == 'hash':
         data = r.hgetall('cleanwebm:' + id_)
-        session = Session()
         webm = session.query(WEBM).get(id_)
         webm.views = data['views']
         webm.likes = data['likes']
         webm.dislikes = data['dislikes']
-        session.commit()  # TODO: maybe should be one bulk operation to save all webms
-        session.close()
     else:
         print('Not hash')
     del_clean_cache(id_)
@@ -73,12 +79,13 @@ def get_clean_cache(id_):
 
     if r_type == 'hash':
         cache = r.hgetall('cleanwebm:' + id_)
-        print("clean_cachce:", cache['screamer_chance'])
+        # print("clean_cachce:", cache['screamer_chance'])
         if cache.get('screamer_chance', None) == 'None':  # Because of redis-py (nil) value casting
             cache['screamer_chance'] = None
         # TODO: Convert from strings types to floats and ints
         return cache
     else:
+        print("Data from DB")
         session = Session()
         webm_data = session.query(WEBM).get(id_)  # Assuming it will be there anyway
         set_cache(webm_data.to_dict())
@@ -100,7 +107,7 @@ def get_cache(dirty_md5):
     :return:  dict with data from cache, "delayed" message or None
     """
     id_ = get_dirty_cache(dirty_md5)
-    print("Clean cache:", id_)
+    #print("Clean cache:", id_)
     if id_ == "delayed":
         return id_
     elif id_ is None:
