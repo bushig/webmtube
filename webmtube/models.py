@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, ForeignKey, ForeignKeyConstraint, \
+    CheckConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.sql import func
@@ -26,6 +27,9 @@ class WEBM(Base):
 
     webms = relationship('DirtyWEBM', cascade='delete')
 
+    CheckConstraint('views >= 0', name='views_positive')
+    CheckConstraint('likes >= 0', name='likes_positive')
+    CheckConstraint('dislikes >= 0', name='dislikes_positive')
     # TODO: Define to_dictionary for JSON serialization
     def to_dict(self):
         return {'id': self.id, 'time_created': self.time_created.isoformat(),

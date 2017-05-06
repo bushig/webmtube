@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from webmtube.models import Base, WEBM, DirtyWEBM
 
 
+# TODO: Test for positive views, likes etc
 def setup_module():
     global connection, engine
     # Connect to the database and create the schema within a transaction
