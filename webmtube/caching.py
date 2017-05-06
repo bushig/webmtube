@@ -1,8 +1,5 @@
-import redis
-
 from webmtube.models import Session, WEBM, DirtyWEBM
-
-r = redis.StrictRedis(host='localhost', port=6379, db=1, decode_responses=True)
+from webmtube.config import CACHING_REDIS as r
 
 
 def set_cache(webm_data):
@@ -59,6 +56,7 @@ def save_webm_to_db(id_):
         webm.likes = data['likes']
         webm.dislikes = data['dislikes']
         session.commit()  # TODO: maybe should be one bulk operation to save all webms
+        session.close()
     else:
         print('Not hash')
     del_clean_cache(id_)
@@ -76,6 +74,7 @@ def get_clean_cache(id_):
         print("clean_cachce:", cache['screamer_chance'])
         if cache.get('screamer_chance', None) == 'None':  # Because of redis-py (nil) value casting
             cache['screamer_chance'] = None
+        # TODO: Convert from strings types to floats and ints
         return cache
     else:
         session = Session()

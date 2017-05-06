@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.sql import func
 
 from webmtube.config import DB_ENGINE
@@ -10,7 +10,8 @@ engine = create_engine(DB_ENGINE)
 Base = declarative_base()
 
 # TODO: Use scoped_session
-Session = sessionmaker(bind=engine)
+session_factory = sessionmaker(bind=engine)
+Session = scoped_session(session_factory)
 
 
 class WEBM(Base):

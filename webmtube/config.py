@@ -1,5 +1,7 @@
 from os import path
 
+import redis
+
 # 2CH URL
 DVACH_DOMAINS = ('2ch.hk', '2ch.pm', '2ch.re', '2ch.tf', '2ch.wf', '2ch.yt', '2-ch.so')
 ALLOWED_BOARDS = ('b', 'gd', "pr", 'mlp')
@@ -12,8 +14,9 @@ DB_ENGINE = 'sqlite:///db.sqlite3'
 BROKER = 'redis://localhost:6379/0'
 
 # Redis caching
-CACHING_HOST = 'redis://localhost:6379/1'
-LIKES_HOST = 'redis://localhost:6379/2'
+CACHING_REDIS = redis.StrictRedis(host='localhost', port=6379, db=1, decode_responses=True)
+
+
 
 WEBM_PATH = path.join(BASE_DIR, 'webm_files')
 

@@ -1,14 +1,11 @@
 import logging
 
-import redis
 from falcon import status_codes
 
 from webmtube.caching import set_cache_delayed, get_cache, set_cache, incr_views, like_webm, check_ip_viewed
-from webmtube.models import Session, WEBM, DirtyWEBM
 from webmtube.tasks import analyse_video
 from webmtube.utils import is_valid_2ch_url
 
-r = redis.StrictRedis(host='localhost', port=6379, db=1)
 falcon_log = logging.getLogger('falcon')
 
 
