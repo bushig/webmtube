@@ -9,6 +9,7 @@ MAX_SIZE = 22000000  # 22MB
 
 BASE_DIR = path.abspath('')
 DB_ENGINE = 'sqlite:///db.sqlite3'
+TESTING_DB_ENGINE = 'sqlite:///test.db'
 
 # Celery configs
 BROKER = 'redis://localhost:6379/0'
