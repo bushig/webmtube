@@ -9,7 +9,7 @@ def set_cache(webm_data):
     :param webm_data: dict with data from DB
     :return: True when successful and False otherwise
     """
-    print("setting data:", webm_data)
+    # print("setting data:", webm_data)
     id_ = webm_data.get('id', None)  # TODO: check its schema
     if id_:
         r_type = r.type('cleanwebm:' + id_)
@@ -86,7 +86,7 @@ def get_clean_cache(id_):
         # TODO: Convert from strings types to floats and ints
         return cache
     else:
-        print("Data from DB")
+        #print("Data from DB")
         session = Session()
         webm_data = session.query(WEBM).get(id_)  # Assuming it will be there anyway
         set_cache(webm_data.to_dict())
