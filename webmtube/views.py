@@ -24,7 +24,7 @@ class ScreamerResource:
         url = request.get_param('url')
         response.set_header("Access-Control-Allow-Origin", "*")
         webm_redis_info = get_cache(md5)  # data, delayed or None
-        print("redis:", webm_redis_info)
+        # print("redis:", webm_redis_info)
         # If data in cache
         if isinstance(webm_redis_info, dict):
             webm_redis_info['md5'] = md5
