@@ -65,6 +65,7 @@ def save_webm_to_db(id_, session):
         webm.views = data['views']
         webm.likes = data['likes']
         webm.dislikes = data['dislikes']
+        session.commit()  # TODO make bulk
     else:
         print('Not hash')
     del_clean_cache(id_)

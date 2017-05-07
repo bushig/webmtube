@@ -30,7 +30,6 @@ def before_shutdown_handler():
         save_webm_to_db(md5, session)
         counter += 1
         print("Saved webm #{} to DB: {}".format(counter, md5))
-    session.commit()
     print("Saved ", counter, "in total")
 
 
