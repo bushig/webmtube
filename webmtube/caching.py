@@ -25,7 +25,8 @@ def set_dirty_cache(md5, id_):
 
 
 def set_cache_delayed(md5):
-    r.set('dirtywebm:' + md5, 'delayed')
+    # r.set('dirtywebm:' + md5, 'delayed')
+    r.setex('dirtywebm:' + md5, 7200, 'delayed')  # 2 hours
 
 
 def del_dirty_cache(md5):
