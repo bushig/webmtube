@@ -36,11 +36,12 @@ function runAPI() {
                     if (ext === 'webm') {
                         const aElem = document.querySelector(`a[href="${ src }"]`);
                         const md5 = aElem.getAttribute('id').split('-').pop(-1);
-                        let currViewed = window.webm_data[md5].data.currViewed;
+                        const currViewed = window.webm_data[md5].data.currViewed;
+                        const id = window.webm_data[md5].data.id;
                         // console.log(md5);
                         if (currViewed !== true) {
                             // Увеличиваем счетчик только если не просмотрено в данной сессии
-                            increaseViews(md5);
+                            increaseViews(md5, id);
                         }
                     }
                     break;

@@ -1,6 +1,6 @@
 import {MAX_SIZE, DEFAULT_SETTINGS} from './config'
 let moment = require('moment');
-moment.locale('ru')
+moment.locale('ru');
 // Полифил чтобы работал Firefox
 // global.browser = global.chrome;
 
@@ -44,10 +44,10 @@ function OneWEBMListener(event) {
 
 }
 
-function increaseViews(md5) {
+function increaseViews(md5, id) {
     // Наъуй мозиллу и промисы
     // Проверяем просмотрен ли ролик
-    let infoPromise = browser.storage.local.get(md5);
+    let infoPromise = browser.storage.local.get(id);
 
     let dataPromise = browser.storage.local.get({'views': 0, 'uniqueViews': 0});
     Promise.all([infoPromise, dataPromise]).then((values) => {
@@ -55,22 +55,22 @@ function increaseViews(md5) {
         let data = values[1];
         let viewsCount = data['views'] + 1;// Увеличиваем даже если до этого были просмотры.
         let uniqueViewsCount = data['uniqueViews']; // Уникальные просмотры
-        let obj = info[md5];
+        let obj = info[id];
         // Еще нет данных или еще не просмотрен
         if (obj === undefined) {
             uniqueViewsCount++;
             obj = {};
             obj.viewed = true;
         } else if (obj.viewed !== true) {
-            Object.assign(obj, {viewed: true});
+            obj.viewed = true;
         }
         let req = {};
-        req[md5] = obj;
+        req[id] = obj;
         browser.storage.local.set(req);
         browser.storage.local.set({'views': viewsCount, 'uniqueViews': uniqueViewsCount});
-        return md5;
-    }).then((md5) => {
-        console.log('Удачный просмотр: ');
+        return id;
+    }).then((id) => {
+        console.log('Удачный просмотр: ', id);
         let webmData = window.webm_data[md5].data;
         console.log(webmData);
         Object.assign(window.webm_data[md5].data, {
@@ -92,17 +92,18 @@ function increaseViews(md5) {
     fetch(request);
 }
 function increaseViewsListener(event) {
-    event.target.removeEventListener('click', increaseViewsListener);
+    event.currentTarget.removeEventListener('click', increaseViewsListener);
     const md5 = event.currentTarget.md5;
-    if (md5 === undefined) {
-        conslole.log('Не удалось повесить счетчик просмотров на: ', event.target);
-        console.log(md5, event.target);
+    const id = event.currentTarget.id;
+    if (md5 === undefined || id === undefined) {
+        console.log('Не удалось повесить счетчик просмотров на: ', event.currentTarget);
+        console.log(md5, event.currentTarget);
     }
-    increaseViews(md5)
+    increaseViews(md5, id)
 }
 
 // Создаем панель если ее нет и в ней размещаем всю информацию
-function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, message, viewed, date} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
+function setWEBMPanel({node, md5, id, screamChance, views, likes, dislikes, action, message, viewed, date} ={}) { // использовать | как сепаратор + добавить подсветку превью на ховер
     let panel = node.querySelector('figcaption > .webm-panel');
     if (panel === null) {
         panel = document.createElement('div');
@@ -117,14 +118,14 @@ function setWEBMPanel({node, md5, screamChance, views, likes, dislikes, action, 
         setViews(panel, views, viewed);
     }
     if (likes !== undefined && dislikes !== undefined) {
-        setLikesPanel(panel, md5, likes, dislikes, action)
+        setLikesPanel(panel, md5, id, likes, dislikes, action)
     }
     if (message !== undefined) {
         setMessage(panel, message);
     }
 }
 
-function setLikesPanel(panel, md5 = null, likes, dislikes, action = null) {
+function setLikesPanel(panel, md5, id, likes, dislikes, action = null) {
     let ratingPanel = panel.querySelector('span.rating');
     if (ratingPanel === null) {
         ratingPanel = document.createElement('span');
@@ -136,14 +137,14 @@ function setLikesPanel(panel, md5 = null, likes, dislikes, action = null) {
         let likeCounter = document.createTextNode(likes);
         likesSpan.appendChild(likeCounter);
         ratingPanel.appendChild(likesSpan);
-        setLikesListener(likesSpan.childNodes[0], md5, 'like');
+        setLikesListener(likesSpan.childNodes[0], md5, id, 'like');
 
         let dislikesSpan = document.createElement('span');
         createLikeIcon(dislikesSpan, 'dislike', action);
         let dislikeCounter = document.createTextNode(dislikes);
         dislikesSpan.appendChild(dislikeCounter);
         ratingPanel.appendChild(dislikesSpan);
-        setLikesListener(dislikesSpan.childNodes[0], md5, 'dislike');
+        setLikesListener(dislikesSpan.childNodes[0], md5, id, 'dislike');
     } else {
         let [likesSpan, dislikesSpan] = ratingPanel.querySelectorAll('span');
 
@@ -158,9 +159,9 @@ function setLikesPanel(panel, md5 = null, likes, dislikes, action = null) {
 
 // Отвечает за отправку запроса на сервер(лайки и дизлайки) и установку новых иконок и счетчика лайков
 // TODO: Проверить убираются ли EventListeners сборщиком мусора при замене иконок
-function setLikesListener(node, md5, action_type) {
+function setLikesListener(node, md5, id, action_type) {
     // Мозилла пiдоры
-    node.addEventListener('click', function (event) {
+    node.addEventListener('click', (event) => {
         let requestHeader = new Headers();
         requestHeader.append('Content-Type', 'application/json');
         requestHeader.append('Accept', 'application/json');
@@ -172,10 +173,11 @@ function setLikesListener(node, md5, action_type) {
         fetch(request).then((resp)=> {
             return resp.json()
         }).then((data) => {
+            console.log("Likes data:", data);
             Object.assign(window.webm_data[md5].data, data); //DANGER!
             let action = data.action;
             let obj = {};
-            obj[md5] = {action: null};
+            obj[id] = {action: null}; // Стандатные значения для запроса
             // Данные из хранилища
             let storeDataPromise = browser.storage.local.get(obj);
             // Количество лайков из хранилища
@@ -185,38 +187,38 @@ function setLikesListener(node, md5, action_type) {
                 let likesData = values[1];
                 let likes = likesData.likes;
                 let dislikes = likesData.dislikes;
-                console.log(storeData[md5].action, action);
+                // console.log(storeData[md5].action, action);
                 // Если одинаковый action
-                if (storeData[md5].action === action) {
+                if (storeData[id].action === action) {
                     // Nothing
                     // Разный action и не равен null
-                } else if (storeData[md5].action !== action && storeData[md5].action !== null && action !== null) {
-                    if (storeData[md5].action === 'like') {
+                } else if (storeData[id].action !== action && storeData[id].action !== null && action !== null) {
+                    if (storeData[id].action === 'like') {
                         likes--;
                         dislikes++;
-                    } else if (storeData[md5].action === 'dislike') {
+                    } else if (storeData[id].action === 'dislike') {
                         likes++;
                         dislikes--;
                     }
                     // Один из action равен null
-                } else if (storeData[md5].action === null) {
+                } else if (storeData[id].action === null) {
                     if (action == 'like') {
                         likes++
                     } else {
                         dislikes++
                     }
                 } else if (action === null) {
-                    if (storeData[md5].action == 'like') {
+                    if (storeData[id].action == 'like') {
                         likes--
                     } else {
                         dislikes--
                     }
                 }
-                return {md5, likes, dislikes, action, storeData}
+                return {md5, id, likes, dislikes, action, storeData}
             }).then((resultData)=> {
-                let {md5, likes, dislikes, action, storeData} = resultData;
+                let {md5, id, likes, dislikes, action, storeData} = resultData;
                 browser.storage.local.set({likes: likes, dislikes: dislikes}).then(()=> {
-                    storeData[md5].action = action;
+                    storeData[id].action = action;
                     browser.storage.local.set(storeData).then(()=> {
                         // TODO: Тут нужно сделать сохранение новой информации в window.webm_data и использовать ее при парсе
                         parseData(window.webm_data[md5].data, true);
@@ -275,11 +277,12 @@ function setMessage(panel, text) {
 }
 
 // Отвечает за увеличение счетчика просмотров
-function setViewListener(node, md5) {
+function setViewListener(node, md5, id) {
     var img = node.querySelector('img.preview');
     // console.log(img);
     img.removeEventListener('click', increaseViewsListener);
     img.md5 = md5;
+    img.id = id;
     img.addEventListener('click', increaseViewsListener, false);
 }
 
@@ -358,17 +361,18 @@ function createIcon(node, name, cls) {
 function parseData(data, onlyRender = false) {
     // TODO: Сделать отдельные функции для парсинга и для рендеринга
     // Если стоит onlyRender не изменять данные в глобальном объекте
-    let md5 = data.md5;
+    const md5 = data.md5;
+    const id = data.id; // TODO: CHECK ITS IN HERE!
     let viewed = false; // Была ли уже просмотрена ШЕБМ
     let currViewed = false; // ШЕБМ была просмотрена в текущем треде (при обновлении страницы сбрасывается)
     let action = null;
-    browser.storage.local.get(md5).then((info) => {
-        if (info[md5]) {
-            if (info[md5].viewed === true) {
+    browser.storage.local.get(id).then((info) => {
+        if (info[id]) {
+            if (info[id].viewed === true) {
                 viewed = true;
             }
-            if (info[md5].action) {
-                action = info[md5].action;
+            if (info[id].action) {
+                action = info[id].action;
             }
             if (data.currViewed) {
                 currViewed = true;
@@ -395,6 +399,7 @@ function parseData(data, onlyRender = false) {
                 node.removeEventListener('mouseenter', OneWEBMListener);
                 setWEBMPanel({
                     node,
+                    id: id,
                     md5: data.md5,
                     screamChance: screamChance,
                     views: data.views,
@@ -406,7 +411,7 @@ function parseData(data, onlyRender = false) {
                     date: data["time_created"]
                 });
                 if (currViewed === false) {
-                    setViewListener(node, md5); // Потом сделать постоянное навешивание, но на сервере увеличивать счетчик не чаще раза в 10 минут
+                    setViewListener(node, md5, id); // Потом сделать постоянное навешивание, но на сервере увеличивать счетчик не чаще раза в 10 минут
                 }
             }
         })
