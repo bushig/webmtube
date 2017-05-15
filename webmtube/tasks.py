@@ -42,6 +42,7 @@ def analyse_video(md5, url):# TODO: Rename to smth
         if webm is None:
             webm = WEBM(id_=strip_md5, screamer_chance=screamer_chance)
             session.add(webm)
+            set_cache(webm.to_dict())
         dirty_webm = DirtyWEBM(md5=md5, webm_id=strip_md5)
         session.add(dirty_webm)
         session.commit()
@@ -49,7 +50,6 @@ def analyse_video(md5, url):# TODO: Rename to smth
             md5)  # TODO: Delete Delayed message and set new in one transaction to prevent possible race condition
         set_dirty_cache(md5, strip_md5)
         # celery_log.info('Releasing WEBM from Celery')
-        set_cache(webm.to_dict())
         return webm.to_dict()
     except Exception as e:
         print('Error encountered: {}'.format(e))
