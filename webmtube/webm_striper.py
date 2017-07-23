@@ -16,7 +16,7 @@ def TemporaryFileOutputStream():
     Filename have to be unicode, whereas (optional) real_filename can be str.
     """
     temp_file = NamedTemporaryFile(delete=False, suffix=".webm")
-    print(temp_file.name)
+    # print(temp_file.name)
     return OutputStream(temp_file, filename=temp_file.name)
 
 
@@ -26,7 +26,7 @@ class MkvStripper(BasicStripper):
         total = 0  # how many bytes to remove
         for field in editor:
             if field.name.startswith("EBML") or field.name.startswith("Void"):
-                print(field.name, field.size)
+                # print(field.name, field.size)
                 size = self.removeField(field, editor)
                 total += size
             elif field.name.startswith('Segment'):
