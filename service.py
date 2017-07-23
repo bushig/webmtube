@@ -13,11 +13,14 @@ def main():
             before_shutdown_handler()
         elif arg == '-flush':
             del_all_dirty_cache()
+            print('Flushed dirty data')
         elif arg == '-flushclean':
             del_all_clean_cache()
+            print('Clean data flushed')
         elif arg == '-celerypurge':
             from webmtube.tasks import app
             app.control.purge()
+            print("Celery purged...")
         else:
             print('Invalid  command')
     else:
