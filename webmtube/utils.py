@@ -12,7 +12,8 @@ def is_valid_2ch_url(url):
     url_info = urlparse(url)
     if url_info.netloc in DVACH_DOMAINS and url_info.scheme in ('http', 'https'):
         path_info = url_info.path.split('/')[1:]
-        if path_info[0] in ALLOWED_BOARDS and path_info[1] == 'src' and path_info[3][-5:] == '.webm':
+        if path_info[0] in ALLOWED_BOARDS and path_info[1] == 'src' and (
+                        path_info[3][-5:] == '.webm' or path_info[3][-4:] == '.mp4'):
             return True
     return False
 

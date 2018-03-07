@@ -26,7 +26,6 @@ def parse_ffmpeg_output(file):
     :param file: Data from stderr of ffmpeg
     :type file: TemporaryFile object
     """
-    parsed_data = []
     line_reg = re.compile(r"\[Parsed_ebur128_\d @ [0-9a-z]{2,16}\]\s+"
                           "t:\s*([\d.]+)\s+"  # Current time in seconds
                           "M:\s*([-\d.]+)\s+"  # Momentary (0.4 sec)

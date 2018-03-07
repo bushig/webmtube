@@ -8,7 +8,8 @@ ALLOWED_BOARDS = ('b', 'gd', "pr", 'mlp')
 MAX_SIZE = 22000000  # 22MB
 
 BASE_DIR = path.abspath('')
-DB_ENGINE = 'sqlite:///db.sqlite3'
+DB_ENGINE = 'postgresql://postgres:qwerty1@localhost:5432/devshaft'
+# 'sqlite:///db.sqlite3'
 TESTING_DB_ENGINE = 'sqlite:///test.db'
 
 # Celery configs

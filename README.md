@@ -2,12 +2,12 @@
 
 Service to detect screamers on 2ch.hk
 
-#Requirements
+# Requirements
 * FFmpeg
 * Redis
 * SSL certificate
 
-#How to start
+# How to start
 1. Start redis server
 ```
 redis-server

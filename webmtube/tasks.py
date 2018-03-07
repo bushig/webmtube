@@ -31,6 +31,7 @@ def analyse_video(md5, url):# TODO: Rename to smth
             raise Exception('md5 not the same.')
         screamer_chance = get_scream_chance(file.name)
         print(file.name)
+        # TODO: check file extension
         strip_filename = strip_webm(file.name)
         strip_md5 = hash_stripped_webm(strip_filename)
         # celery_log.info('Calculated screamer chance is %s. Adding WEBM to DB' % (screamer_chance,))

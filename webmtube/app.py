@@ -33,7 +33,6 @@ def create_app(database_uri):
     app.add_route('/check/{md5}/view', view_webm_resource)
     app.add_route('/check/{md5}/like', like_resource)
     app.add_route('/check/{md5}/dislike', dislike_resource)
-
     return app
 
 
