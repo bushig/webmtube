@@ -47,6 +47,7 @@ def analyse_video(md5, url):# TODO: Rename to smth
         dirty_webm = DirtyWEBM(md5=md5, webm_id=strip_md5)
         session.add(dirty_webm)
         session.commit()
+        session.remove()
         del_dirty_cache(
             md5)  # TODO: Delete Delayed message and set new in one transaction to prevent possible race condition
         set_dirty_cache(md5, strip_md5)
