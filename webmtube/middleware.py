@@ -47,4 +47,4 @@ class JSONTranslator:
         if 'result' not in req.context:
             return
 
-        resp.body = json.dumps(req.context['result'], ensure_ascii=False)
+        resp.body = json.dumps(req.context['result'], ensure_ascii=False, sort_keys=True)

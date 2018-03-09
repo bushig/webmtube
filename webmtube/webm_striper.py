@@ -49,7 +49,7 @@ def stripEditor(editor):
             editor.writeInto(output)
         return output
     else:
-        raise Exception
+        raise Exception("Stripper is not suitable")  # TODO: Refactor to except mp4
 
 
 def strip_webm(filename):

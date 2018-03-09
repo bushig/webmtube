@@ -105,6 +105,7 @@ class ViewWEBMResource:
 
 class LikeResource:
     def on_post(self, request, response, md5):
+        print(request.access_route)
         ip = request.access_route[-1]
         # Возможно сделать валидацию и, на всякий случай, исключить локалхост
         print('Like from ip: ', ip)

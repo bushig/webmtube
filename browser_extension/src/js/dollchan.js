@@ -30,10 +30,11 @@ function runAPI() {
                     }
                     break;
                 case 'expandmedia':
+                    console.log(data);
                     const src = data.data;
                     const ext = src.split('.').pop();
                     // console.log(ext + ' открыт:', src);
-                    if (ext === 'webm') {
+                    if (ext === 'webm' || ext === 'mp4') {
                         const aElem = document.querySelector(`a[href="${ src }"]`);
                         const md5 = aElem.getAttribute('id').split('-').pop(-1);
                         const currViewed = window.webm_data[md5].data.currViewed;

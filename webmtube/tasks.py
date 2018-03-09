@@ -1,3 +1,5 @@
+import traceback
+
 import celery
 from celery import Celery
 
@@ -30,10 +32,12 @@ def analyse_video(md5, url):# TODO: Rename to smth
         if get_file_md5(file) != md5:
             raise Exception('md5 not the same.')
         screamer_chance = get_scream_chance(file.name)
-        print(file.name)
         # TODO: check file extension
-        strip_filename = strip_webm(file.name)
-        strip_md5 = hash_stripped_webm(strip_filename)
+        if file.name.split('.')[1] == 'webm':
+            strip_filename = strip_webm(file.name)
+            strip_md5 = hash_stripped_webm(strip_filename)
+        else:
+            strip_md5 = md5
         # celery_log.info('Calculated screamer chance is %s. Adding WEBM to DB' % (screamer_chance,))
         #print(screamer_chance)
         session = Session()
@@ -45,9 +49,10 @@ def analyse_video(md5, url):# TODO: Rename to smth
             session.add(webm)
             set_cache(webm.to_dict())
         dirty_webm = DirtyWEBM(md5=md5, webm_id=strip_md5)
+        print('dirty_webm: ', dirty_webm)
         session.add(dirty_webm)
         session.commit()
-        session.remove()
+        # session.remove()
         del_dirty_cache(
             md5)  # TODO: Delete Delayed message and set new in one transaction to prevent possible race condition
         set_dirty_cache(md5, strip_md5)
@@ -55,7 +60,7 @@ def analyse_video(md5, url):# TODO: Rename to smth
         return webm.to_dict()
     except Exception as e:
         print('Error encountered: {}'.format(e))
-
+        traceback.print_exc()
 
 if __name__ == "__main__":
     app.start()

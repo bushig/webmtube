@@ -25,7 +25,7 @@ class WEBM(Base):
     CheckConstraint('dislikes >= 0', name='dislikes_positive')
     # TODO: Define to_dictionary for JSON serialization
     def to_dict(self):
-        return {'id': self.id, 'time_created': self.time_created.isoformat(),
+        return {'id': self.id, 'time_created': str(self.time_created),
                 'screamer_chance': self.screamer_chance, 'views': self.views, 'likes': self.likes,
                 'dislikes': self.dislikes}
 
