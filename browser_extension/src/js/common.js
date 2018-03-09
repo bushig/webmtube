@@ -443,7 +443,7 @@ function getAllWEBMData(nodes) {
     nodes.forEach(function (node) {
         var div = node.querySelector('div');
         var a = div.querySelector('a');
-        if (a.getAttribute('href').slice(-5) == ".webm") {
+        if (a.getAttribute('href').slice(-5) == ".webm" || a.getAttribute('href').slice(-4) == ".mp4") {
             var size = parseInt(node.querySelector('figcaption.file-attr > span.filesize').innerText.substring(1, 30).split(',')[0]);
             var md5 = div.id.split('-').pop();
             var url = qualifyURL(a.getAttribute('href'));
