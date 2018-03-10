@@ -4,7 +4,7 @@ import redis
 
 # 2CH URL
 DVACH_DOMAINS = ('2ch.hk', '2ch.pm', '2ch.re', '2ch.tf', '2ch.wf', '2ch.yt', '2-ch.so')
-ALLOWED_BOARDS = ('b', 'gd', "pr", 'mlp')
+ALLOWED_BOARDS = ('b', 'gd', "pr", 'mlp', 'a')
 MAX_SIZE = 22000000  # 22MB
 
 BASE_DIR = path.abspath('')

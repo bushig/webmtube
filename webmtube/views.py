@@ -88,8 +88,10 @@ class ScreamerResource:
 
 class ViewWEBMResource:
     def on_post(self, request, response, md5):
-        ip = request.access_route[-1]
-        viewed = check_ip_viewed(md5, ip)
+        # ip = request.access_route[-1]
+        ip = '127.0.0.1'
+        # viewed = check_ip_viewed(md5, ip)
+        viewed = ''
         if type(viewed) == int:
             print('Until views reset: ', viewed)
             response.status = status_codes.HTTP_304
@@ -105,8 +107,9 @@ class ViewWEBMResource:
 
 class LikeResource:
     def on_post(self, request, response, md5):
-        print(request.access_route)
-        ip = request.access_route[-1]
+        # print(request.access_route)
+        # ip = request.access_route[-1]
+        ip = '127.0.0.1'
         # Возможно сделать валидацию и, на всякий случай, исключить локалхост
         print('Like from ip: ', ip)
         data = like_webm(md5, ip, 'like')
@@ -120,7 +123,8 @@ class LikeResource:
 
 class DislikeResource:
     def on_post(self, request, response, md5):
-        ip = request.access_route[-1]
+        # ip = request.access_route[-1]
+        ip = '127.0.0.1'
         print('Dislike from ip: ', ip)
         data = like_webm(md5, ip, 'dislike')
         if data:
