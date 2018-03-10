@@ -302,13 +302,15 @@ function setScreamColor(node, panel, screamChance, date) {
     const img = node.querySelector('.webm-file');
     let clsHighlight = " ";
     // настройки панельки
-    let volumePanelType = settings.volumePanelDisplay;
+    let volumePanelType = settings.volumePanelDisplay; // TODO: Await settings
     let iconDisplay;
     let iconColor;
     if (volumePanelType === 'color') {
         iconDisplay = "radio-unchecked";
     } else if (volumePanelType === 'none') {
         iconDisplay = 'clock';
+    } else {
+        iconDisplay = "radio-unchecked";
     }
     if (volumePanelType === 'none' || volumePanelType === 'icons') {
         iconColor = 'none';
@@ -440,7 +442,7 @@ function getOneWEBMData(node) {
 function getAllWEBMData(nodes) {
     var data = []; // Данные которые отправляем на сервер
 
-    nodes.forEach(function (node) {
+    for (let node of nodes) {
         var div = node.querySelector('div');
         var a = div.querySelector('a');
         if (a.getAttribute('href').slice(-5) == ".webm" || a.getAttribute('href').slice(-4) == ".mp4") {
@@ -458,7 +460,8 @@ function getAllWEBMData(nodes) {
                 setWEBMPanel({node, message: 'Слишком большой размер'})
             }
         }
-    });
+    }
+    ;
     // Если нет ничего нового, то останавливаем функцию
     if (data.length === 0) {
         return
