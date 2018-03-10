@@ -41,7 +41,6 @@ class MkvStripper(BasicStripper):
 
 def stripEditor(editor):
     stripper = MkvStripper(editor, 0)
-
     if stripper():
         # output = FileOutputStream('test.webm')
         output = TemporaryFileOutputStream()
@@ -49,7 +48,8 @@ def stripEditor(editor):
             editor.writeInto(output)
         return output
     else:
-        raise Exception("Stripper is not suitable")  # TODO: Refactor to except mp4
+        pass
+        # raise Exception("Stripper is not suitable")  # TODO: Refactor to except mp4
 
 
 def strip_webm(filename):
@@ -58,7 +58,10 @@ def strip_webm(filename):
 
     output = stripEditor(editor)
     # print(output.filename)
-    return output.filename
+    if output:
+        return output.filename
+    else:
+        return filename
 
 
 def hash_stripped_webm(filename):
