@@ -1,6 +1,7 @@
 import falcon
-import json
 import logging
+
+import ujson
 
 falcon_log = logging.getLogger('falcon')
 
@@ -33,7 +34,7 @@ class JSONTranslator:
                                         'A valid JSON document is required.')
 
         try:
-            req.context['doc'] = json.loads(body.decode('utf-8'))
+            req.context['doc'] = ujson.loads(body.decode('utf-8'))
 
         except (ValueError, UnicodeDecodeError):
             falcon_log.exception('Malformed JSON, could not decode')
@@ -47,4 +48,4 @@ class JSONTranslator:
         if 'result' not in req.context:
             return
 
-        resp.body = json.dumps(req.context['result'], ensure_ascii=False, sort_keys=True)
+        resp.body = ujson.dumps(req.context['result'], ensure_ascii=False, sort_keys=True)

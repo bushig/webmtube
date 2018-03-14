@@ -59,16 +59,18 @@ def save_webm_to_db(id_, session):
     Note that it does not commit to session
     """
     r_type = r.type('cleanwebm:' + id_)
-
-    if r_type == 'hash':
-        data = r.hgetall('cleanwebm:' + id_)
-        webm = session.query(WEBM).get(id_)
-        webm.views = data['views']
-        webm.likes = data['likes']
-        webm.dislikes = data['dislikes']
-        session.commit()  # TODO make bulk
-    else:
-        print('Not hash')
+    try:
+        if r_type == 'hash':
+            data = r.hgetall('cleanwebm:' + id_)
+            webm = session.query(WEBM).get(id_)
+            webm.views = data['views']
+            webm.likes = data['likes']
+            webm.dislikes = data['dislikes']
+            session.commit()  # TODO make bulk
+        else:
+            print('Not hash')
+    except:
+        print("Unexpected error while saving")
     del_clean_cache(id_)
 
 

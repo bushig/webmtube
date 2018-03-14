@@ -13,8 +13,8 @@ const currBoard = pathArray[1];
 // Если мы не на главной странице и доска поддерживается, то включаем скрипт
 console.log(currBoard);
 console.log(pathArray.length);
-setTimeout(runAPI, 0);
 if (document.querySelector('div#de-main')) {
+    setTimeout(runAPI, 0);
     console.log('Есть кукла!');
 
     window.isDollchanEnabled = true;

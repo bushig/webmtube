@@ -288,6 +288,7 @@ function setViewListener(node, md5, id) {
 
 // Красит элемент в нужный цвет в зависимости от шанса скримера
 function setScreamColor(node, panel, screamChance, date) {
+    screamChance += "";
     var scream = panel.querySelector('span.scream.tooltip');
     if (scream === null) {
         scream = document.createElement('span');
@@ -319,7 +320,7 @@ function setScreamColor(node, panel, screamChance, date) {
         clsHighlight = "-const ";
     }
     switch (screamChance) {
-        case null:
+        case "null":
             img.className += ' blue-shadow' + clsHighlight;
             scream.style.background = iconColor || '#3DBFFF';
             createIcon(scream, iconDisplay || 'volume-mute');
