@@ -13,7 +13,7 @@ gunicorn==19.7.1
 hachoir3==3.0a2
 hiredis==0.2.0
 honcho==1.0.1
-httpie==0.9.9
+httpie==1.0.3
 idna==2.6
 kombu==4.1.0
 packaging==17.1
