@@ -4,7 +4,7 @@ appdirs==1.4.3
 attrs==17.4.0
 billiard==3.5.0.3
 celery==4.1.0
-certifi==2018.1.18
+certifi==2022.12.7
 chardet==3.0.4
 coverage==4.5.1
 falcon==1.4.1
